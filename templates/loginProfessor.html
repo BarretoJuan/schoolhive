@@ -1,0 +1,42 @@
+{% extends './base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block customCSS %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">  
+    <div class="row">
+        <div class="col-sm-3 side-panel">
+            <div class="column">
+                <a href="/login"><img class="mb-4" src="{{ url_for('static', filename='img/schoolhive.png') }}" alt="" width="100" height="90"/></a>
+                <h1 class="mt-0">School<strong>Hive</strong></h1>
+                <h5 class="mb-5-mt-0">Futuro Educativo</h3>
+                <h5 class="mt-5">"Controla tus notas, alcanza tus metas"</h5>
+            </div> 
+        </div>
+        <div class="col-sm-9 form-signin"> 
+            <div class="row" style = "padding-top: 40px;">
+                <form class="form-signin" action="/login/professor" method="POST"> 
+                    <h3>¡Bienvenido de vuelta!</h3>
+                    <h3><strong>Inicia sesión en tu cuenta: Profesor</strong></h3>
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Username">
+                        <label for="username">E-mail</label>
+                    </div>
+                    <div class="form-floating mt-2">
+                        <input type="password" class="form-control" name="password" placeholder="Password">
+                        <label for="password">Contraseña</label>
+                    </div>
+                    <div class="msg">{{ msg }}</div>
+                    <button class="w-100 btn btn-lg btn-primary" type="submit" style="background-color: #813035;">Inicia Sesión</button>
+                </form>
+    
+            </div>
+        </div>
+    </div>  
+</div> 
+{% endblock %}
