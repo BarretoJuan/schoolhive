@@ -1,25 +1,10 @@
 /* navbar.css */
 html,
-body {
-  height: 100%;
-}
+
 
 body {
-  display: flex;
-  align-items: left;
-  padding-top: 40px;
-  padding-bottom: 40px;
-  background-color: #3B171B;
-}
-
-body {
-  display: flex;
-  align-items: center;
-  padding-top: 40px;
-  padding-bottom: 40px;
   background-color: #eeeeee;
 }
-
 /* Customize the background color of the navbar */
 .navbar {
     background-color: #3B171B;
