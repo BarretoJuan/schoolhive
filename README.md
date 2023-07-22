@@ -3,13 +3,13 @@
 ## Roadmap & TODO
 ---
 ### Frontend
-[ ] Admin views 1/24
+[ ] Admin views 2/24
 
 [ X ] Auth Views 4/4
 
-[ ] Student views 0/2
+[ ] Student views 1/2
 
-[ ] Professor views 0/3
+[ ] Professor views 1/3
 
 ### Backend
 #### Administrator
