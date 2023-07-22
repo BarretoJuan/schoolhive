@@ -29,3 +29,11 @@ def admin():
 @app.route("/admin/menu")
 def admin_dashboard():
     return render_template("admin/adminDashboard.html")
+
+@app.route("/admin/profile")
+def admin_profile():
+    return render_template("admin/adminProfileEdit.html")
+
+@app.route("/admin/profile")
+def test():
+    return render_template("admin/adminProfileEdit.html")
