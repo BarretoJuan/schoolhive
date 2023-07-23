@@ -39,6 +39,9 @@ def admin_dashboard():
 def admin_profile():
     return render_template("admin/adminProfileEdit.html")
 
+#ADMIN/CLASS ROUTES
+
+
 #ADMIN/MAJOR ROUTES
 @app.route("/admin/major-menu")
 def admin_major_menu():
@@ -50,13 +53,37 @@ def admin_major_menu():
 def admin_major_create():
     return render_template("admin/adminMajor/majorCreate.html")
 
-@app.route("/admin/major-edit")
+@app.route("/admin/major-edit") #implement major by id
 def admin_major_edit():
     return render_template("admin/adminMajor/majorEdit.html")
 
 @app.route("/admin/major-") #implement major by id
 def admin_major():
     return render_template("admin/adminMajor/major.html")
+
+#ADMIN/PROFESSOR ROUTES
+
+
+
+#ADMIN/SECTION ROUTES
+
+#ADMIN/STUDENT ROUTES
+
+#ADMIN/TERM ROUTES
+@app.route("/admin/term-menu")
+def admin_term_menu():
+    terms=[{"term_name": "1-2023"}, {"term_name":"2-2023"}]
+    print("terms? ",terms)
+    return render_template("admin/adminTerm/termMenu.html", terms=terms)
+
+@app.route("/admin/term-create")
+def admin_term_create():
+    return render_template("admin/adminTerm/termCreate.html")
+
+
+@app.route("/admin/term-") #implement major by id
+def admin_term():
+    return render_template("admin/adminMajor/term.html")
 
 #PROFESSOR ROUTES
 @app.route("/professor")
