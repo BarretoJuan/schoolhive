@@ -39,7 +39,24 @@ def admin_dashboard():
 def admin_profile():
     return render_template("admin/adminProfileEdit.html")
 
+#ADMIN/MAJOR ROUTES
+@app.route("/admin/major-menu")
+def admin_major_menu():
+    majors=[{"major_name": "Ingenieria informática"}, {"major_name":"ingeniería electrónica"}]
+    print("majors? ",majors)
+    return render_template("admin/adminMajor/majorMenu.html", majors=majors)
 
+@app.route("/admin/major-create")
+def admin_major_create():
+    return render_template("admin/adminMajor/majorCreate.html")
+
+@app.route("/admin/major-edit")
+def admin_major_edit():
+    return render_template("admin/adminMajor/majorEdit.html")
+
+@app.route("/admin/major-") #implement major by id
+def admin_major():
+    return render_template("admin/adminMajor/major.html")
 
 #PROFESSOR ROUTES
 @app.route("/professor")
@@ -67,3 +84,12 @@ def student_dashboard():
 @app.route("/student/profile")
 def student_profile():
     return render_template("student/studentProfileEdit.html")
+
+
+
+
+#TEST ROUTE
+
+@app.route("/test")
+def test():
+    return render_template("/admin/adminMajor/majorMenu.html")
