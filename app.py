@@ -40,7 +40,8 @@ def admin_profile():
 #ADMIN/CLASS ROUTES
 @app.route("/admin/class-menu")
 def admin_class_menu():
-    classes=[{"class_name": "Calculo IV"}, {"class_name":"Bases de Datos II"}]
+    classes=[{"class_name": "Calculo IV", "section_name":"N-613", "term_name":"2-2023", "professor_name":"Roberto Rodriguez", "student_count":"30"},
+              {"class_name": "Bases de datos II", "section_name":"C-613", "term_name":"3-2022", "professor_name":"Ramón Rodriguez", "student_count":"15"}]
     print("classes? ",classes)
     return render_template("admin/adminClass/classMenu.html", classes=classes)
 
@@ -50,7 +51,11 @@ def admin_class_create():
 
 @app.route("/admin/class-assign") #implement major by id
 def admin_class_assign():
-    return render_template("admin/adminClass/classAssign.html")
+    classes=[{"class_name": "Calculo IV", "section_name":"N-613", "term_name":"2-2023", "professor_name":"Roberto Rodriguez", "student_count":"30"},
+              {"class_name": "Bases de datos II", "section_name":"C-613", "term_name":"3-2022", "professor_name":"Ramón Rodriguez", "student_count":"15"}]
+    sections=[{"section_name":"N-613"},{"section_name":"C-613"},{"section_name":"H-613"},{"section_name":"O-613"}]
+    terms=[{"term_name":"1-2023"},{"term_name":"2-2023"},{"term_name":"3-2023"},{"term_name":"3-2022"}]
+    return render_template("admin/adminClass/classAssign.html",classes=classes, sections=sections, terms=terms)
 
 @app.route("/admin/class-") #implement major by id
 def admin_class():
@@ -125,7 +130,10 @@ def admin_student_create():
 
 @app.route("/admin/student-enroll") #implement student by id
 def admin_student_enroll():
-    return render_template("admin/adminStudent/studentEnroll.html")
+    classes=[{"class_name":"Cálculo IV"},{"class_name":"Geometría"},{"class_name":"Cálculo III"},{"class_name":"Programación III" }]
+    sections=[{"section_name":"N-613"},{"section_name":"C-613"},{"section_name":"H-613"},{"section_name":"O-613"}]
+    terms=[{"term_name":"1-2023"},{"term_name":"2-2023"},{"term_name":"3-2023"},{"term_name":"3-2022"}]
+    return render_template("admin/adminStudent/studentEnroll.html", classes=classes, sections=sections, terms=terms)
 
 @app.route("/admin/student-") #implement student by id
 def admin_student():
