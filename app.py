@@ -88,7 +88,10 @@ def admin_professor_create():
 
 @app.route("/admin/professor-enroll") #implement professor by id
 def admin_professor_enroll():
-    return render_template("admin/adminProfessor/professorEnroll.html")
+    classes=[{"class_name":"Cálculo IV"},{"class_name":"Geometría"},{"class_name":"Cálculo III"},{"class_name":"Programación III" }]
+    sections=[{"section_name":"N-613"},{"section_name":"C-613"},{"section_name":"H-613"},{"section_name":"O-613"}]
+    terms=[{"term_name":"1-2023"},{"term_name":"2-2023"},{"term_name":"3-2023"},{"term_name":"3-2022"}]
+    return render_template("admin/adminProfessor/professorEnroll.html", classes=classes, sections=sections, terms=terms)
 
 @app.route("/admin/professor-") #implement professor by id
 def admin_professor():
