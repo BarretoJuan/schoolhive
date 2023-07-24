@@ -106,7 +106,7 @@ def admin_section_create():
     return render_template("admin/adminSection/sectionCreate.html")
 
 @app.route("/admin/section-") #implement section by id
-def admin_term():
+def admin_section():
     return render_template("admin/adminSection/section.html")
 
 #ADMIN/STUDENT ROUTES
