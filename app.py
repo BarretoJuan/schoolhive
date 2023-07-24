@@ -24,8 +24,6 @@ def login_student():
 def login_professor():
     return render_template("/auth/loginProfessor.html")
 
-
-
 #ADMIN ROUTES
 @app.route("/admin")
 def admin():
@@ -40,7 +38,23 @@ def admin_profile():
     return render_template("admin/adminProfileEdit.html")
 
 #ADMIN/CLASS ROUTES
+@app.route("/admin/class-menu")
+def admin_class_menu():
+    classes=[{"class_name": "Calculo IV"}, {"class_name":"Bases de Datos II"}]
+    print("classes? ",classes)
+    return render_template("admin/adminClass/classMenu.html", classes=classes)
 
+@app.route("/admin/class-create")
+def admin_class_create():
+    return render_template("admin/adminClass/classCreate.html")
+
+@app.route("/admin/class-assign") #implement major by id
+def admin_class_assign():
+    return render_template("admin/adminClass/classAssign.html")
+
+@app.route("/admin/class-") #implement major by id
+def admin_class():
+    return render_template("admin/adminClass/class.html")
 
 #ADMIN/MAJOR ROUTES
 @app.route("/admin/major-menu")
@@ -62,12 +76,58 @@ def admin_major():
     return render_template("admin/adminMajor/major.html")
 
 #ADMIN/PROFESSOR ROUTES
+@app.route("/admin/professor-menu")
+def admin_professor_menu():
+    professors=[{"professor_name": "Ramón Ramírez", "professor_cedula": "10444777"}, {"professor_name":"Jose Jose Sr.", "professor_cedula": "10555777"}]
+    print("professors? ",professors)
+    return render_template("admin/adminProfessor/professorMenu.html", professors=professors)
 
+@app.route("/admin/professor-create")
+def admin_professor_create():
+    return render_template("admin/adminProfessor/professorCreate.html")
 
+@app.route("/admin/professor-enroll") #implement professor by id
+def admin_professor_enroll():
+    return render_template("admin/adminProfessor/professorEnroll.html")
+
+@app.route("/admin/professor-") #implement professor by id
+def admin_professor():
+    return render_template("admin/adminProfessor/professor.html")
 
 #ADMIN/SECTION ROUTES
+@app.route("/admin/section-menu")
+def admin_section_menu():
+    sections=[{"section_name": "N-613"}, {"section_name":"C-613"}]
+    print("sections? ",sections)
+    return render_template("admin/adminSection/sectionMenu.html", sections=sections)
+
+@app.route("/admin/section-create")
+def admin_section_create():
+    return render_template("admin/adminSection/sectionCreate.html")
+
+@app.route("/admin/section-") #implement section by id
+def admin_term():
+    return render_template("admin/adminSection/section.html")
 
 #ADMIN/STUDENT ROUTES
+@app.route("/admin/student-menu")
+def admin_student_menu():
+    students=[{"student_name": "Ramón Rodríguez", "student_cedula": "31444777"}, {"student_name":"José José", "student_cedula": "31555777"}]
+    print("students? ",students)
+    return render_template("admin/adminStudent/studentMenu.html", students=students)
+
+@app.route("/admin/student-create")
+def admin_student_create():
+    return render_template("admin/adminStudent/studentCreate.html")
+
+@app.route("/admin/student-enroll") #implement student by id
+def admin_student_enroll():
+    return render_template("admin/adminStudent/studentEnroll.html")
+
+@app.route("/admin/student-") #implement student by id
+def admin_student():
+    return render_template("admin/adminStudent/student.html")
+
 
 #ADMIN/TERM ROUTES
 @app.route("/admin/term-menu")
@@ -80,8 +140,7 @@ def admin_term_menu():
 def admin_term_create():
     return render_template("admin/adminTerm/termCreate.html")
 
-
-@app.route("/admin/term-") #implement major by id
+@app.route("/admin/term-") #implement term by id
 def admin_term():
     return render_template("admin/adminMajor/term.html")
 
@@ -98,7 +157,6 @@ def professor_dashboard():
 def professor_profile():
     return render_template("professor/professorProfileEdit.html")
 
-
 #STUDENT ROUTES
 @app.route("/student")
 def student():
@@ -111,9 +169,6 @@ def student_dashboard():
 @app.route("/student/profile")
 def student_profile():
     return render_template("student/studentProfileEdit.html")
-
-
-
 
 #TEST ROUTE
 
