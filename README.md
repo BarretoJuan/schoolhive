@@ -3,7 +3,7 @@
 ## Roadmap & TODO
 ---
 ### Frontend
-[ ] Admin views 9/24
+[ ] Admin views 12/24
 
 [ X ] Auth Views 4/4
 
