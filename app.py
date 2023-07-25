@@ -162,11 +162,19 @@ def professor():
 
 @app.route("/professor/menu")
 def professor_dashboard():
-    return render_template("professor/professorDashboard.html")
+    classes=[{"class_name": "Calculo IV", "section_name":"N-613", "term_name":"2-2023", "professor_name":"Roberto Rodriguez", "student_count":"30"},
+              {"class_name": "Bases de datos II", "section_name":"C-613", "term_name":"3-2022", "professor_name":"Ramón Rodriguez", "student_count":"15"}]
+    sections=[{"section_name":"N-613"},{"section_name":"C-613"},{"section_name":"H-613"},{"section_name":"O-613"}]
+    terms=[{"term_name":"1-2023"},{"term_name":"2-2023"},{"term_name":"3-2023"},{"term_name":"3-2022"}]
+    return render_template("professor/professorDashboard.html", classes=classes, sections=sections, terms=terms)
 
 @app.route("/professor/profile")
 def professor_profile():
     return render_template("professor/professorProfileEdit.html")
+
+@app.route("/professor/class-") #implement id
+def professor_class():
+    return render_template("professor/professorClass.html")
 
 #STUDENT ROUTES
 @app.route("/student")
