@@ -45,9 +45,9 @@ def admin_class_menu():
     print("classes? ",classes)
     return render_template("admin/adminClass/classMenu.html", classes=classes)
 
-@app.route("/admin/class-create")
-def admin_class_create():
-    return render_template("admin/adminClass/classCreate.html")
+# @app.route("/admin/class-create")
+# def admin_class_create():
+#     return render_template("admin/adminClass/classCreate.html")
 
 @app.route("/admin/class-assign") #implement major by id
 def admin_class_assign():

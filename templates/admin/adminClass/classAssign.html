@@ -34,14 +34,12 @@
     <form class="form-signin" action="/admin/class-assign" method="POST">
             <div>
                 <h4 class="alignleft">Asignación de materia</h4>
-                <div class="form-floating mt-2">
-                    <h4 class="mt-4">Materia</h4>   
-                    <select name="materia" id="materia" required>
-                        <option value="">Seleccione una Materia</option>
-                        {% for class in classes %}
-                        <option value="{{class['class_name']}}">{{class['class_name']}}</option>
-                        {% endfor %}
-                    </select>
+                <div>
+                    <h3 class="alignleft">Creación de Materias:</h3>
+                    <div class="form-floating mt-2">
+                        <input type="text" maxlength="45" class="form-control" id="nombreMateria" name="nombreMateria" placeholder="nombreMateria" required>
+                        <label for="numPeriodo">Ingrese el nombre de la materia</label>
+                    </div>
                 </div>
                 <div class="form-floating mt-2">
                     <h4 class="mt-2">Sección</h4>   
