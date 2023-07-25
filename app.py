@@ -111,7 +111,8 @@ def admin_section_menu():
 
 @app.route("/admin/section-create")
 def admin_section_create():
-    return render_template("admin/adminSection/sectionCreate.html")
+    majors = [{"major_name":"ingenieria informatica"},{"major_name":"ingenieria electronica"},{"major_name":"contaduria"}]
+    return render_template("admin/adminSection/sectionCreate.html", majors = majors)
 
 @app.route("/admin/section-") #implement section by id
 def admin_section():
