@@ -59,7 +59,9 @@ def admin_class_assign():
 
 @app.route("/admin/class-") #implement major by id
 def admin_class():
-    return render_template("admin/adminClass/class.html")
+    classs = {"nombre":"Calculo IV", "periodo":"1-2023","seccion":"n-613","profesor":"jose jose"}
+    students = [{"nombre":"student1", "cedula":"5566"},{"nombre":"student2", "cedula":"55466"}]
+    return render_template("admin/adminClass/class.html", classs=classs, students=students)
 
 #ADMIN/MAJOR ROUTES
 @app.route("/admin/major-menu")
