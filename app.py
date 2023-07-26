@@ -78,7 +78,11 @@ def admin_major_edit():
 
 @app.route("/admin/major-") #implement major by id
 def admin_major():
-    return render_template("admin/adminMajor/major.html")
+    major={"nombre":"Ingenieria informática"}
+    students=[{"nombre":"roberto roberto", "cedula":"555"},{"nombre":"pedro roberto", "cedula":"455"},{"nombre":"ramon roberto", "cedula":"44"},{"nombre":"enrique roberto", "cedula":"33"}]
+    classes=[{"nombre":"calculo IV", "periodo":"1-2023", "seccion":"n-613", "profesor":"roberto jose", "cedula_profesor":"5533", "num_participantes":"30"}, {"nombre":"calculo IV", "periodo":"1-2023", "seccion":"n-613", "profesor":"roberto jose", "cedula_profesor":"5533", "num_participantes":"30"}]
+
+    return render_template("admin/adminMajor/major.html", major=major,students=students,classes=classes)
 
 #ADMIN/PROFESSOR ROUTES
 @app.route("/admin/professor-menu")
