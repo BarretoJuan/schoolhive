@@ -7,7 +7,7 @@
 
 [ X ] Auth Views 4/4
 
-[ ] Student views 1/2
+[ X ] Student views 2/2
 
 [ ] Professor views 2/3
 
