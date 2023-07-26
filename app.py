@@ -141,7 +141,9 @@ def admin_student_enroll():
 
 @app.route("/admin/student-") #implement student by id
 def admin_student():
-    return render_template("admin/adminStudent/student.html")
+    classes  = [{"nombre_materia":"calculo IV", "seccion":"n613", "periodo":"1-2023"}, {"nombre_materia":"calculo III", "seccion":"n613", "periodo":"1-2023"}]
+    student = {"nombre":"José José", "cedula":"5478487"}
+    return render_template("admin/adminStudent/student.html", classes=classes, student=student)
 
 
 #ADMIN/TERM ROUTES
