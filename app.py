@@ -118,7 +118,9 @@ def admin_section_create():
 
 @app.route("/admin/section-") #implement section by id
 def admin_section():
-    return render_template("admin/adminSection/section.html")
+    classes  = [{"nombre_materia":"calculo IV", "periodo":"1-2023", "profesor":"roberto jose", "num_participantes":"30"}, {"nombre_materia":"calculo IV", "periodo":"1-2023", "profesor":"roberto jose", "num_participantes":"10"}]
+    section = {"nombre":"C613", "carrera":"Ingeniería en computación"}
+    return render_template("admin/adminSection/section.html", classes=classes, section=section)
 
 #ADMIN/STUDENT ROUTES
 @app.route("/admin/student-menu")
