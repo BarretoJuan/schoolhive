@@ -100,7 +100,9 @@ def admin_professor_enroll():
 
 @app.route("/admin/professor-") #implement professor by id
 def admin_professor():
-    return render_template("admin/adminProfessor/professor.html")
+    classes  = [{"nombre_materia":"calculo IV", "seccion":"n613", "periodo":"1-2023"}, {"nombre_materia":"calculo III", "seccion":"n613", "periodo":"1-2023"}]
+    professor = {"nombre":"José José", "cedula":"5478487"}
+    return render_template("admin/adminProfessor/professor.html", classes=classes, professor=professor)
 
 #ADMIN/SECTION ROUTES
 @app.route("/admin/section-menu")
