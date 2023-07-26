@@ -9,7 +9,7 @@
 
 [ X ] Student views 2/2
 
-[ ] Professor views 2/3
+[ X ] Professor views 3/3
 
 ### Backend
 #### Administrator

@@ -176,7 +176,8 @@ def professor_profile():
 
 @app.route("/professor/class-") #implement id
 def professor_class():
-    return render_template("professor/professorClass.html")
+    students=[{"name":"roberto roberto", "cedula":"555","nota":"20"},{"name":"pedro roberto", "cedula":"455","nota":"10"},{"name":"ramon roberto", "cedula":"44","nota":"14"},{"name":"enrique roberto", "cedula":"33","nota":"05"}]
+    return render_template("professor/professorClass.html", students=students)
 
 #STUDENT ROUTES
 @app.route("/student")
