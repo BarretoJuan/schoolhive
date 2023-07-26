@@ -161,7 +161,9 @@ def admin_term_create():
 
 @app.route("/admin/term-") #implement term by id
 def admin_term():
-    return render_template("admin/adminMajor/term.html")
+    classes  = [{"nombre_materia":"calculo IV", "seccion":"N-613", "profesor":"roberto jose", "num_participantes":"30"}, {"nombre_materia":"calculo IV", "seccion":"C-613", "profesor":"roberto jose", "num_participantes":"10"}]
+    term = {"nombre":"1-2023"}
+    return render_template("admin/adminTerm/term.html", classes=classes, term=term)
 
 #PROFESSOR ROUTES
 @app.route("/professor")
