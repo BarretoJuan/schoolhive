@@ -5,6 +5,10 @@ html,
 body {
   background-color: #eeeeee;
 }
+
+table, th, td {
+  border: 1px solid black;
+}
 /* Customize the background color of the navbar */
 .navbar {
     background-color: #3B171B;
@@ -147,5 +151,9 @@ body {
     .form-inline {
       display: inline-block;
     }
+
+    
+
+
     
     

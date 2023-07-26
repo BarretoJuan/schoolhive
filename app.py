@@ -122,6 +122,7 @@ def admin_section():
 @app.route("/admin/student-menu")
 def admin_student_menu():
     students=[{"student_name": "Ramón Rodríguez", "student_cedula": "31444777"}, {"student_name":"José José", "student_cedula": "31555777"}]
+    
     print("students? ",students)
     return render_template("admin/adminStudent/studentMenu.html", students=students)
 
@@ -184,7 +185,8 @@ def student():
 
 @app.route("/student/menu")
 def student_dashboard():
-    return render_template("student/studentDashboard.html")
+    classes  = [{"nombre_materia":"calculo IV", "seccion":"n613", "periodo":"1-2023","profesor":"pedro gomez","cedula_profesor":"555","nota":"15"}, {"nombre_materia":"calculo IV", "seccion":"n613", "periodo":"1-2023","profesor":"pedro gomez","cedula_profesor":"5535","nota":"05"},{"nombre_materia":"calculo IV", "seccion":"n613", "periodo":"2-2023","profesor":"pedro gomez","cedula_profesor":"555","nota":"20"}, {"nombre_materia":"calculo IV", "seccion":"n613", "periodo":"3-2023","profesor":"pedro gomez","cedula_profesor":"555","nota":"12"}]
+    return render_template("student/studentDashboard.html", classes=classes)
 
 @app.route("/student/profile")
 def student_profile():
