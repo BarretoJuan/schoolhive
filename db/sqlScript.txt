@@ -1,0 +1,67 @@
+CREATE DATABASE schoolhive;
+USE schoolhive;
+
+CREATE TABLE admin (
+  cedula int(9) PRIMARY KEY,
+  nombre varchar(45) NOT NULL,
+  apellido varchar(45) NOT NULL,
+  email varchar(45) NOT NULL UNIQUE,
+  password varchar(255) NOT NULL
+); 
+
+CREATE TABLE carrera (
+  nombre varchar(45) PRIMARY KEY
+); 
+
+CREATE TABLE estudiante (
+  cedula int(9) PRIMARY KEY,
+  nombre varchar(45) NOT NULL,
+  apellido varchar(45) NOT NULL,
+  email varchar(45) NOT NULL UNIQUE,
+  password varchar(255) NOT NULL,
+  carrera varchar(45) NOT NULL,
+  FOREIGN KEY(carrera) REFERENCES carrera(nombre)
+);
+
+CREATE TABLE profesor (
+  cedula int(9) PRIMARY KEY,
+  nombre varchar(45) NOT NULL,
+  apellido varchar(45) NOT NULL,
+  email varchar(45) NOT NULL UNIQUE,
+  password varchar(255) NOT NULL
+);
+
+CREATE TABLE periodo (
+  nombre varchar(45) PRIMARY KEY
+);
+
+CREATE TABLE seccion (
+  nombre varchar(45) PRIMARY KEY,
+  carrera varchar(45) NOT NULL,
+  FOREIGN KEY (carrera) references carrera(nombre)
+);
+
+CREATE TABLE materia (
+  id int(9) PRIMARY KEY AUTO_INCREMENT,
+  nombre varchar(45) NOT NULL,
+  periodo varchar(45) NOT NULL,
+  seccion varchar(45) NOT NULL,
+  FOREIGN KEY (periodo) REFERENCES periodo(nombre),
+  FOREIGN KEY (seccion) REFERENCES seccion(nombre)
+);
+
+
+CREATE TABLE materia_profesor (
+  materia int(9) NOT NULL,
+  profesor int(9) NOT NULL,
+  FOREIGN KEY (materia) references materia(id),
+  FOREIGN KEY (profesor) references profesor(cedula)
+);
+
+CREATE TABLE materia_estudiante (
+  materia int(9) NOT NULL,
+  estudiante int(9) NOT NULL,
+  nota int(3) NOT NULL,
+  FOREIGN KEY (materia) references materia(id),
+  FOREIGN KEY (estudiante) references estudiante(cedula)
+);
