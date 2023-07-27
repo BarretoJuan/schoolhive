@@ -31,33 +31,15 @@
         </div>
     </nav> 
 
-    <form class="form-signin" action="/admin/professor-enroll" method="POST">
+    <form class="form-signin" action="/admin/professor-enroll/{{professor['professor_cedula']}}" method="POST">
             <div>
-                <h4 class="alignleft">Asignación de materia al profesor: profesor_nombre</h4>
+                <h4 class="alignleft">Asignación de materia al profesor: {{professor['professor_name']}} {{professor['professor_last_name']}}</h4>
                 <div class="form-floating mt-2">
                     <h4 class="mt-4">Materia</h4>   
                     <select name="materia" id="materia" required>
                         <option value="">Seleccione una Materia</option>
                         {% for class in classes %}
-                        <option value="{{class['class_name']}}">{{class['class_name']}}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-floating mt-2">
-                    <h4 class="mt-2">Sección</h4>   
-                    <select name="seccion" id="seccion" required>
-                        <option value="">Seleccione una Sección</option>
-                        {% for section in sections %}
-                        <option value="{{section['section_name']}}">{{section['section_name']}}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-floating mt-2">
-                    <h4 class="mt-2">Período</h4>   
-                    <select name="periodo" id="periodo" required>
-                        <option value="">Seleccione un Período</option>
-                        {% for term in terms %}
-                        <option value="{{term['term_name']}}">{{term['term_name']}}</option>
+                        <option value="{{class['class_id']}}">{{class['class_name']}} / {{class['class_term']}} / {{class['class_section']}}</option>
                         {% endfor %}
                     </select>
                 </div>

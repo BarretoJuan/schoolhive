@@ -41,33 +41,62 @@ def admin_profile():
 #ADMIN/CLASS ROUTES
 @admin_bp.route("/class-menu")
 def admin_class_menu():
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     user_check = check_user(session)
     if(user_check == "admin"):
         if request.method == 'GET':
+            get_classes = '''SELECT
+             materia.nombre AS class_name,
+             materia.seccion AS section_name,
+             materia.periodo AS term_name,
+             profesor.nombre AS professor_name,
+             COUNT(materia_estudiante.estudiante) AS student_count 
+             FROM materia
+             JOIN materia_profesor ON materia_profesor.materia = materia.id
+             JOIN profesor ON profesor.cedula = materia_profesor.profesor'''
             classes=[{"class_name": "Calculo IV", "section_name":"N-613", "term_name":"2-2023", "professor_name":"Roberto Rodriguez", "student_count":"30"},
             {"class_name": "Bases de datos II", "section_name":"C-613", "term_name":"3-2022", "professor_name":"Ramón Rodriguez", "student_count":"15"}]
-            print("classes? ",classes)
             return render_template("admin/adminClass/classMenu.html", classes=classes)
         else:
-            # User is not admin
             return redirect(url_for("login.login"))
     else:
+        # User is not admin
         return redirect(url_for("login.login"))
 
-@admin_bp.route("/class-assign") #implement major by id
+@admin_bp.route("/class-assign", methods = ['GET', 'POST']) #implement major by id
 def admin_class_assign():
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT nombre as section_name from seccion")
+    sections = cursor.fetchall()
+    cursor.execute("SELECT nombre as term_name from periodo")
+    terms = cursor.fetchall()       
+    log_msg="" 
     user_check = check_user(session)
+
     if(user_check == "admin"):
-        if request.method == 'GET':
-            classes=[{"class_name": "Calculo IV", "section_name":"N-613", "term_name":"2-2023", "professor_name":"Roberto Rodriguez", "student_count":"30"},
-            {"class_name": "Bases de datos II", "section_name":"C-613", "term_name":"3-2022", "professor_name":"Ramón Rodriguez", "student_count":"15"}]
-            sections=[{"section_name":"N-613"},{"section_name":"C-613"},{"section_name":"H-613"},{"section_name":"O-613"}]
-            terms=[{"term_name":"1-2023"},{"term_name":"2-2023"},{"term_name":"3-2023"},{"term_name":"3-2022"}]
-            return render_template("admin/adminClass/classAssign.html",classes=classes, sections=sections, terms=terms)
+        if request.method == 'GET':       
+            return render_template("admin/adminClass/classAssign.html", sections=sections, terms=terms)
         else:
-            # User is not admin
-            return redirect(url_for("login.login"))
+            class_name = request.form['nombreMateria']
+            class_section = request.form['seccion']
+            class_term = request.form['periodo']
+
+            check_class = "SELECT EXISTS (SELECT 1 FROM materia WHERE nombre = %s AND seccion = %s AND periodo = %s) AS exist"
+            cursor.execute(check_class, (class_name, class_section, class_term,))
+            class_exists = cursor.fetchone()
+
+            if not class_exists["exist"]:
+                query = "INSERT INTO materia (nombre, seccion, periodo) VALUES (%s,%s,%s)"
+                cursor.execute(query, (class_name, class_section, class_term,))
+                mysql.connection.commit()
+                return redirect(url_for("admin.admin_class_menu"))
+            else:
+                log_msg = "Esta materia ya existe."
+                return render_template("admin/adminClass/classAssign.html", sections=sections, terms=terms, msg=log_msg)
     else:
+        # User is not admin
         return redirect(url_for("login.login"))
    
     
@@ -103,16 +132,31 @@ def admin_major_menu():
     else:
         return redirect(url_for("login.login"))
 
-@admin_bp.route("/major-create")
+@admin_bp.route("/major-create", methods = ['GET', 'POST'])
 def admin_major_create():
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    log_msg = ''
     user_check = check_user(session)
     if(user_check == "admin"):
         if request.method == 'GET':
             return render_template("admin/adminMajor/majorCreate.html")
-        else:
-            # User is not admin
-            return redirect(url_for("login.login"))
+        else: # We assume they cannot send any other method but post
+            major_name = request.form['nombreCarrera']
+            query_major_exist = "SELECT EXISTS(SELECT 1 FROM carrera WHERE nombre = %s) AS exist"
+            cursor.execute(query_major_exist, (major_name,))
+            check_major_exist = cursor.fetchone()
+
+            if not check_major_exist['exist']:
+                cursor.execute("INSERT INTO carrera (nombre) VALUES (%s)", (major_name,))
+                mysql.connection.commit()
+                return redirect(url_for("admin.admin_major_menu"))
+            else:
+               log_msg = "Esta carrera ya existe" # It already exist
+               return render_template("admin/adminMajor/majorCreate.html", msg = log_msg)
+            
     else:
+        # User is not admin
         return redirect(url_for("login.login"))    
     
 
@@ -145,17 +189,21 @@ def admin_major():
         return redirect(url_for("login.login"))   
 
 #ADMIN/PROFESSOR ROUTES
-@admin_bp.route("/professor-menu")
+@admin_bp.route("/professor-menu", methods = ['GET'])
 def admin_professor_menu():
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     user_check = check_user(session)
     if(user_check == "admin"):
-        if request.method == 'GET':
-            professors=[{"professor_name": "Ramón Ramírez", "professor_cedula": "10444777"}, {"professor_name":"Jose Jose Sr.", "professor_cedula": "10555777"}]
-            print("professors? ",professors)
+            get_professors = """SELECT 
+            nombre AS professor_name,
+            apellido AS professor_last_name,
+            cedula AS professor_cedula
+            FROM profesor"""
+            cursor.execute(get_professors)
+            professors=cursor.fetchall()
+
             return render_template("admin/adminProfessor/professorMenu.html", professors=professors)
-        else:
-            # User is not admin
-            return redirect(url_for("login.login"))
     else:
         return redirect(url_for("login.login"))   
     
@@ -211,18 +259,37 @@ def admin_professor_create():
     else:
         return redirect(url_for("login.login"))
 
-@admin_bp.route("/professor-enroll") #implement professor by id
-def admin_professor_enroll():
+@admin_bp.route("/professor-enroll/<cedula>", methods = ['GET', 'POST']) #implement professor by id
+def admin_professor_enroll(cedula):
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    # SELECT id, nombre FROM materia WHERE NOT EXISTS(SELECT materia FROM materia_profesor WHERE materia.id = materia_profesor.materia);
+    get_classes = " SELECT id as class_id, nombre as class_name, periodo as class_term, seccion as class_section FROM materia WHERE NOT EXISTS(SELECT materia FROM materia_profesor WHERE materia.id = materia_profesor.materia)"
+    cursor.execute(get_classes)
+    classes=cursor.fetchall()
+    get_professor = "SELECT cedula as professor_cedula, nombre as professor_name, apellido as professor_last_name from profesor where cedula = %s"
+    cursor.execute (get_professor, (cedula,))
+    professor=cursor.fetchone()
+    log_msg=""
     user_check = check_user(session)
+
     if(user_check == "admin"):
         if request.method == 'GET':
-            classes=[{"class_name":"Cálculo IV"},{"class_name":"Geometría"},{"class_name":"Cálculo III"},{"class_name":"Programación III" }]
-            sections=[{"section_name":"N-613"},{"section_name":"C-613"},{"section_name":"H-613"},{"section_name":"O-613"}]
-            terms=[{"term_name":"1-2023"},{"term_name":"2-2023"},{"term_name":"3-2023"},{"term_name":"3-2022"}]
-            return render_template("admin/adminProfessor/professorEnroll.html", classes=classes, sections=sections, terms=terms)
+            return render_template("admin/adminProfessor/professorEnroll.html", classes=classes, professor=professor)
         else:
-            # User is not admin
-            return redirect(url_for("login.login"))
+            class_id = request.form["materia"]
+            check_if_class_has_professor = "SELECT EXISTS (SELECT 1 FROM materia_profesor WHERE materia = %s) AS exist"
+            cursor.execute(check_if_class_has_professor, (class_id),)
+            professor_check = cursor.fetchone()
+
+            if not professor_check['exist']:
+                cursor.execute ("INSERT INTO materia_profesor (materia, profesor) VALUES (%s,%s)", (class_id,cedula,))
+                mysql.connection.commit()
+                return redirect(url_for("admin.admin_professor_menu"))
+            else:
+                log_msg="Esta materia ya tiene un profesor asignado." 
+                return render_template("admin/adminProfessor/professorEnroll.html", classes=classes, professor=professor,msg=log_msg)
+            
     else:
         return redirect(url_for("login.login"))   
 
@@ -243,11 +310,14 @@ def admin_professor():
 #ADMIN/SECTION ROUTES
 @admin_bp.route("/section-menu")
 def admin_section_menu():
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     user_check = check_user(session)
     if(user_check == "admin"):
         if request.method == 'GET':
-            sections=[{"section_name": "N-613"}, {"section_name":"C-613"}]
-            print("sections? ",sections)
+            get_sections = "SELECT nombre as section_name FROM seccion"
+            cursor.execute(get_sections)
+            sections = cursor.fetchall()
             return render_template("admin/adminSection/sectionMenu.html", sections=sections)
         else:
             # User is not admin
@@ -255,17 +325,35 @@ def admin_section_menu():
     else:
         return redirect(url_for("login.login"))  
 
-@admin_bp.route("/section-create")
+@admin_bp.route("/section-create", methods = ['GET', 'POST'])
 def admin_section_create():
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    log_msg=""
+    get_majors = "SELECT nombre as major_name FROM carrera"
+    cursor.execute(get_majors)
+    majors = cursor.fetchall()
     user_check = check_user(session)
     if(user_check == "admin"):
         if request.method == 'GET':
-            majors = [{"major_name":"ingenieria informatica"},{"major_name":"ingenieria electronica"},{"major_name":"contaduria"}]
             return render_template("admin/adminSection/sectionCreate.html", majors = majors)
         else:
-            # User is not admin
-            return redirect(url_for("login.login"))
+            section_name = request.form["nombreSeccion"]
+            section_major = request.form["carrera"]
+            query_section_exists = "SELECT EXISTS (SELECT 1 FROM seccion WHERE nombre = %s) AS exist"
+            cursor.execute(query_section_exists, (section_name,))
+            section_exists = cursor.fetchone()
+            if not section_exists['exist']:
+                insert_section = "INSERT INTO seccion(nombre, carrera) VALUES (%s, %s)"
+                cursor.execute(insert_section, (section_name, section_major))
+                mysql.connection.commit()
+                return redirect(url_for("admin.admin_section_menu"))
+            else:
+                log_msg = "Esta sección ya existe."
+                return render_template("admin/adminSection/sectionCreate.html", majors = majors, msg=log_msg)
+
     else:
+        # User is not admin
         return redirect(url_for("login.login"))  
 
 
@@ -286,39 +374,89 @@ def admin_section():
 #ADMIN/STUDENT ROUTES
 @admin_bp.route("/student-menu")
 def admin_student_menu():
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     user_check = check_user(session)
     if(user_check == "admin"):
-        if request.method == 'GET':
-            students=[{"student_name": "Ramón Rodríguez", "student_cedula": "31444777"}, {"student_name":"José José", "student_cedula": "31555777"}]
-            print("students? ",students)
-            return render_template("admin/adminStudent/studentMenu.html", students=students)     
-        else:
-            # User is not admin
-            return redirect(url_for("login.login"))
+        get_students = "SELECT nombre as student_name, apellido as student_last_name, cedula as student_cedula from estudiante"
+        cursor.execute(get_students)
+        students = cursor.fetchall()
+        return render_template("admin/adminStudent/studentMenu.html", students=students)     
+       
     else:
         return redirect(url_for("login.login"))  
 
-@admin_bp.route("/student-create")
+@admin_bp.route("/student-create", methods=['GET', 'POST'])
 def admin_student_create():
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    log_msg = ''
+    error_flag = False
     user_check = check_user(session)
     if(user_check == "admin"):
         if request.method == 'GET':
-            return render_template("admin/adminStudent/studentCreate.html")   
+            get_majors = '''
+            SELECT nombre as major_name FROM carrera
+            '''
+            cursor.execute(get_majors)
+            majors=cursor.fetchall()
+            return render_template("admin/adminStudent/studentCreate.html", majors=majors)
+              
+        elif request.method == 'POST':
+            student_name = request.form["nombre"]
+            student_last_name = request.form["apellido"]
+            student_id = request.form["cedula"]
+            student_major = request.form["carrera"]
+            student_email = request.form["email"]
+            student_password = request.form["password"]
+            student_confirm_password = request.form["confirmarPassword"]
+            student_hash = hashlib.sha1((student_password + current_app.secret_key).encode()).hexdigest()
+            
+            cursor.execute("SELECT EXISTS (SELECT 1 FROM estudiante WHERE cedula = %s) AS exist", (student_id,))
+            cedula_exists = cursor.fetchone()
+
+            if cedula_exists['exist'] == 1:
+                log_msg = "Esta cédula ya está en uso."
+                error_flag = True 
+    
+            cursor.execute("SELECT EXISTS (SELECT 1 FROM estudiante WHERE email = %s) AS exist", (student_id,))
+            email_exists = cursor.fetchone()
+            if email_exists['exist'] == 1:
+                log_msg = "Este email ya está en uso."
+                error_flag = True 
+            
+            if student_password != student_confirm_password:
+                log_msg = "Las contraseñas no coinciden." 
+                error_flag = True 
+
+            if error_flag:
+                return render_template("admin/adminStudent/studentCreate.html", msg = log_msg)
+            else:
+                insert_student = "INSERT INTO estudiante(cedula, nombre, apellido, email, password, carrera) VALUES(%s, %s, %s, %s, %s, %s)"
+                cursor.execute(insert_student, (student_id, student_name, student_last_name, student_email, student_hash, student_major))
+                mysql.connection.commit()
+                return redirect(url_for("admin.admin_student_menu"))
+
         else:
             # User is not admin
             return redirect(url_for("login.login"))
     else:
         return redirect(url_for("login.login")) 
 
-@admin_bp.route("/student-enroll") #implement student by id
-def admin_student_enroll():
+@admin_bp.route("/student-enroll/<cedula>", methods = ['GET', 'POST']) #implement student by id
+def admin_student_enroll(cedula):
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT nombre as student_name, apellido as student_last_name, cedula as student_cedula from estudiante where cedula = %s", (cedula,))
+    student = cursor.fetchone()
     user_check = check_user(session)
     if(user_check == "admin"):
         if request.method == 'GET':
-            classes=[{"class_name":"Cálculo IV"},{"class_name":"Geometría"},{"class_name":"Cálculo III"},{"class_name":"Programación III" }]
-            sections=[{"section_name":"N-613"},{"section_name":"C-613"},{"section_name":"H-613"},{"section_name":"O-613"}]
-            terms=[{"term_name":"1-2023"},{"term_name":"2-2023"},{"term_name":"3-2023"},{"term_name":"3-2022"}]
-            return render_template("admin/adminStudent/studentEnroll.html", classes=classes, sections=sections, terms=terms)
+
+            get_classes = "SELECT id AS class_id, seccion as class_section, periodo as class_term, nombre as class_name FROM materia WHERE NOT EXISTS(SELECT materia FROM materia_estudiante WHERE materia.id = materia_estudiante.materia AND materia_estudiante.estudiante = %s)"
+            cursor.execute(get_classes, (cedula,))
+            classes = cursor.fetchall()
+            return render_template("admin/adminStudent/studentEnroll.html", classes=classes, student=student)
         else:
             # User is not admin
             return redirect(url_for("login.login"))
@@ -341,30 +479,45 @@ def admin_student():
         return redirect(url_for("login.login")) 
 
 #ADMIN/TERM ROUTES
-@admin_bp.route("/term-menu")
+@admin_bp.route("/term-menu", methods = ['GET'])
 def admin_term_menu():
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     user_check = check_user(session)
     if(user_check == "admin"):
-        if request.method == 'GET':
-            terms=[{"term_name": "1-2023"}, {"term_name":"2-2023"}]
-            print("terms? ",terms)
+            get_terms = "SELECT nombre as term_name FROM periodo"
+            cursor.execute(get_terms)
+            terms = cursor.fetchall()
             return render_template("admin/adminTerm/termMenu.html", terms=terms)
-        else:
-            # User is not admin
-            return redirect(url_for("login.login"))
     else:
         return redirect(url_for("login.login")) 
 
-@admin_bp.route("/term-create")
+@admin_bp.route("/term-create", methods = ['GET', "POST"])
 def admin_term_create():
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     user_check = check_user(session)
     if(user_check == "admin"):
         if request.method == 'GET':
             return render_template("admin/adminTerm/termCreate.html")
         else:
-            # User is not admin
-            return redirect(url_for("login.login"))
+            term_number = request.form['numPeriodo']
+            term_year = request.form['yearPeriodo']
+            term_name = term_number+"-"+term_year
+
+            check_term_exist = "SELECT EXISTS (SELECT 1 FROM periodo WHERE nombre = %s ) AS exist"
+            cursor.execute(check_term_exist, (term_name,))
+            term = cursor.fetchone()
+
+            if not term['exist']:
+                insert_term = "INSERT INTO periodo (nombre) VALUES (%s)"
+                cursor.execute(insert_term, (term_name,))
+                mysql.connection.commit()
+                return redirect(url_for("admin.admin_term_menu"))
+            else:
+                return render_template("admin/adminTerm/termCreate.html", msg = "Ya este período existe")
     else:
+        # User is not admin
         return redirect(url_for("login.login")) 
 
 @admin_bp.route("/term-") #implement term by id

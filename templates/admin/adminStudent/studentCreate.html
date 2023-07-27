@@ -60,6 +60,19 @@
             <label for="cedula">Cédula</label>
         </div>
 
+        
+        <div class="form-floating mt-2">
+            <h4 class="mt-2">Carrera del estudiante</h4>   
+            <select name="carrera" id="carrera" required>
+                <option value="">Seleccione una carrera</option>
+                {% for major in majors %}
+                <option value="{{major['major_name']}}">{{major['major_name']}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+
+
         <div class="form-floating mt-2">
             <input type="password" class="form-control" maxlength="255" id="password" name="password" placeholder="Password" required>
             <label for="password">Contraseña</label>

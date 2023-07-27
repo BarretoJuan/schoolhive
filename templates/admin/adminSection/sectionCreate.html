@@ -42,7 +42,7 @@
 
             <div class="form-floating mt-2">
                 <h4 class="mt-2">Carrera de la Sección</h4>   
-                <select name="periodo" id="periodo" required>
+                <select name="carrera" id="carrera" required>
                     <option value="">Seleccione una carrera</option>
                     {% for major in majors %}
                     <option value="{{major['major_name']}}">{{major['major_name']}}</option>
