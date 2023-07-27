@@ -57,7 +57,7 @@
             <li style="padding: 10px; margin-top: 10px; margin-bottom: 10px; margin-right: 250px; text-align: left; border: 1px solid #000; border-radius: 2%;">
                 <div class="row">
                     <div class="col-md-6" style="margin-top: 5px;">
-                        <h3>{{ professor['professor_name'] }}</h3>
+                        <h3>{{ professor['professor_name'] }} {{professor['professor_last_name']}}</h3>
                         <h5>{{professor['professor_cedula']}}</h5>
                     </div>
 
@@ -67,7 +67,7 @@
                                 &nbsp&nbsp&nbspVer Detalles&nbsp&nbsp&nbsp
                             </button>
                         </a>
-                        <a href="/admin/professor-enroll">
+                        <a href="/admin/professor-enroll/{{professor['professor_cedula']}}">
                             <button class="btn btn-sm btn-primary mt-2" style="background-color: #813035; margin-left: 150px;">
                                 &nbsp&nbsp&nbspAsignar Materia&nbsp&nbsp&nbsp
                             </button>
