@@ -1,7 +1,7 @@
 from platform import os
 
 class Config:
-    SECRET_KEY = 'arremangala arrepujala sí, arremangala arrepujala no'
+    SECRET_KEY = 'arremangala arrepujala no, arremangala arrepujala sí'
     DEBUG = True
     MYSQL_HOST = 'localhost'
     MYSQL_USER = 'root'
