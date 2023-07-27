@@ -3,6 +3,7 @@ from flask_mysqldb import MySQL
 import MySQLdb.cursors
 import hashlib
 import re
+from lib.check_user import check_user
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -26,10 +27,6 @@ def admin_class_menu():
               {"class_name": "Bases de datos II", "section_name":"C-613", "term_name":"3-2022", "professor_name":"Ramón Rodriguez", "student_count":"15"}]
     print("classes? ",classes)
     return render_template("admin/adminClass/classMenu.html", classes=classes)
-
-# @admin_bp.route("/admin/class-create")
-# def admin_class_create():
-#     return render_template("admin/adminClass/classCreate.html")
 
 @admin_bp.route("/class-assign") #implement major by id
 def admin_class_assign():
@@ -75,9 +72,56 @@ def admin_professor_menu():
     print("professors? ",professors)
     return render_template("admin/adminProfessor/professorMenu.html", professors=professors)
 
-@admin_bp.route("/professor-create")
+@admin_bp.route("/professor-create", methods=["GET", "POST"])
 def admin_professor_create():
-    return render_template("admin/adminProfessor/professorCreate.html")
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    log_msg = ''
+    error_flag = False
+    user_check = check_user(session)
+
+    if(user_check == "admin"):
+        if request.method == 'GET':
+            return render_template("admin/adminProfessor/professorCreate.html")
+        elif request.method == 'POST':
+            professor_name = request.form["nombre"]
+            professor_last_name = request.form["apellido"]
+            professor_id = request.form["cedula"]
+            professor_email = request.form["email"]
+            professor_password = request.form["password"]
+            professor_confirm_password = request.form["confirmarPassword"]
+            professor_hash = hashlib.sha1((professor_password + current_app.secret_key).encode()).hexdigest()
+            
+            cursor.execute("SELECT EXISTS (SELECT 1 FROM profesor WHERE cedula = %s) AS exist", (professor_id,))
+            cedula_exists = cursor.fetchone()
+
+            if cedula_exists['exist'] == 1:
+                log_msg = "Esta cédula ya está en uso."
+                error_flag = True 
+    
+            cursor.execute("SELECT EXISTS (SELECT 1 FROM profesor WHERE email = %s) AS exist", (professor_id,))
+            email_exists = cursor.fetchone()
+            if email_exists['exist'] == 1:
+                log_msg = "Este email ya está en uso."
+                error_flag = True 
+            
+            if professor_password != professor_confirm_password:
+                log_msg = "Las contraseñas no coinciden." 
+                error_flag = True 
+
+            if error_flag:
+                return render_template("admin/adminProfessor/professorCreate.html", msg = log_msg)
+            else:
+                insert_professor = "INSERT INTO profesor(cedula, nombre, apellido, email, password) VALUES(%s, %s, %s, %s, %s)"
+                cursor.execute(insert_professor, (professor_id, professor_name, professor_last_name, professor_email, professor_hash))
+                mysql.connection.commit()
+                return redirect(url_for("admin.admin_professor_menu"))
+        else:
+            # User is not admin
+            return redirect(url_for("login.login"))
+
+    else:
+        return redirect(url_for("login.login"))
 
 @admin_bp.route("/professor-enroll") #implement professor by id
 def admin_professor_enroll():
