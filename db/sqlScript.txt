@@ -65,3 +65,86 @@ CREATE TABLE materia_estudiante (
   FOREIGN KEY (materia) references materia(id),
   FOREIGN KEY (estudiante) references estudiante(cedula)
 );
+
+admin
++----------+--------------+------+-----+---------+-------+
+| Field    | Type         | Null | Key | Default | Extra |
++----------+--------------+------+-----+---------+-------+
+| cedula   | int(9)       | NO   | PRI | NULL    |       |
+| nombre   | varchar(45)  | NO   |     | NULL    |       |
+| apellido | varchar(45)  | NO   |     | NULL    |       |
+| email    | varchar(45)  | NO   | UNI | NULL    |       |
+| password | varchar(255) | NO   |     | NULL    |       |
++----------+--------------+------+-----+---------+-------+
+
+carrera
++--------+-------------+------+-----+---------+-------+
+| Field  | Type        | Null | Key | Default | Extra |
++--------+-------------+------+-----+---------+-------+
+| nombre | varchar(45) | NO   | PRI | NULL    |       |
++--------+-------------+------+-----+---------+-------+
+
+estudiante
++----------+--------------+------+-----+---------+-------+
+| Field    | Type         | Null | Key | Default | Extra |
++----------+--------------+------+-----+---------+-------+
+| cedula   | int(9)       | NO   | PRI | NULL    |       |
+| nombre   | varchar(45)  | NO   |     | NULL    |       |
+| apellido | varchar(45)  | NO   |     | NULL    |       |
+| email    | varchar(45)  | NO   | UNI | NULL    |       |
+| password | varchar(255) | NO   |     | NULL    |       |
+| carrera  | varchar(45)  | NO   | MUL | NULL    |       |
++----------+--------------+------+-----+---------+-------+
+
+materia
++---------+-------------+------+-----+---------+----------------+
+| Field   | Type        | Null | Key | Default | Extra          |
++---------+-------------+------+-----+---------+----------------+
+| id      | int(9)      | NO   | PRI | NULL    | auto_increment |
+| nombre  | varchar(45) | NO   |     | NULL    |                |
+| periodo | varchar(45) | NO   | MUL | NULL    |                |
+| seccion | varchar(45) | NO   | MUL | NULL    |                |
++---------+-------------+------+-----+---------+----------------+
+
+materia_estudiante
++------------+--------+------+-----+---------+-------+
+| Field      | Type   | Null | Key | Default | Extra |
++------------+--------+------+-----+---------+-------+
+| materia    | int(9) | NO   | MUL | NULL    |       |
+| estudiante | int(9) | NO   | MUL | NULL    |       |
+| nota       | int(3) | NO   |     | NULL    |       |
++------------+--------+------+-----+---------+-------+
+
+materia_profesor
++----------+--------+------+-----+---------+-------+
+| Field    | Type   | Null | Key | Default | Extra |
++----------+--------+------+-----+---------+-------+
+| materia  | int(9) | NO   | MUL | NULL    |       |
+| profesor | int(9) | NO   | MUL | NULL    |       |
++----------+--------+------+-----+---------+-------+
+
+periodo
++--------+-------------+------+-----+---------+-------+
+| Field  | Type        | Null | Key | Default | Extra |
++--------+-------------+------+-----+---------+-------+
+| nombre | varchar(45) | NO   | PRI | NULL    |       |
++--------+-------------+------+-----+---------+-------+
+
+profesor
++----------+--------------+------+-----+---------+-------+
+| Field    | Type         | Null | Key | Default | Extra |
++----------+--------------+------+-----+---------+-------+
+| cedula   | int(9)       | NO   | PRI | NULL    |       |
+| nombre   | varchar(45)  | NO   |     | NULL    |       |
+| apellido | varchar(45)  | NO   |     | NULL    |       |
+| email    | varchar(45)  | NO   | UNI | NULL    |       |
+| password | varchar(255) | NO   |     | NULL    |       |
++----------+--------------+------+-----+---------+-------+
+
+seccion
++---------+-------------+------+-----+---------+-------+
+| Field   | Type        | Null | Key | Default | Extra |
++---------+-------------+------+-----+---------+-------+
+| nombre  | varchar(45) | NO   | PRI | NULL    |       |
+| carrera | varchar(45) | NO   | MUL | NULL    |       |
++---------+-------------+------+-----+---------+-------+
