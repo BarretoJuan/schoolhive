@@ -70,6 +70,8 @@ def login_admin():
     else:
         if request.method == "GET":
             return render_template("/auth/loginAdmin.html")
+        if request.method == "POST":
+            request.
 
 @login_bp.route("/student")
 def login_student():
