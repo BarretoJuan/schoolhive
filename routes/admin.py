@@ -45,23 +45,22 @@ def admin_class_menu():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     user_check = check_user(session)
     if(user_check == "admin"):
-        if request.method == 'GET':
-            get_classes = '''SELECT
-             materia.nombre AS class_name,
-             materia.seccion AS section_name,
-             materia.periodo AS term_name,
-             profesor.nombre AS professor_name,
-             COUNT(materia_estudiante.estudiante) AS student_count 
-             FROM materia
-             JOIN materia_profesor ON materia_profesor.materia = materia.id
-             JOIN profesor ON profesor.cedula = materia_profesor.profesor'''
-            classes=[{"class_name": "Calculo IV", "section_name":"N-613", "term_name":"2-2023", "professor_name":"Roberto Rodriguez", "student_count":"30"},
-            {"class_name": "Bases de datos II", "section_name":"C-613", "term_name":"3-2022", "professor_name":"Ramón Rodriguez", "student_count":"15"}]
+            get_classes = '''
+            SELECT materia.nombre AS class_name, materia.seccion AS section_name, materia.periodo AS term_name, profesor.nombre AS professor_name, COUNT(materia_estudiante.estudiante) AS student_count 
+            FROM materia 
+            JOIN materia_profesor 
+            ON materia_profesor.materia = materia.id
+            JOIN materia_estudiante ON materia_estudiante.materia = materia.id 
+            JOIN profesor ON profesor.cedula = materia_profesor.profesor 
+            GROUP BY materia_estudiante.materia
+            '''
+            
+
+            cursor.execute(get_classes)
+            classes = cursor.fetchall()
             return render_template("admin/adminClass/classMenu.html", classes=classes)
-        else:
-            return redirect(url_for("login.login"))
     else:
-        # User is not admin
+        # User is not adminf
         return redirect(url_for("login.login"))
 
 @admin_bp.route("/class-assign", methods = ['GET', 'POST']) #implement major by id
@@ -120,15 +119,14 @@ def admin_class():
 #ADMIN/MAJOR ROUTES
 @admin_bp.route("/major-menu")
 def admin_major_menu():
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     user_check = check_user(session)
     if(user_check == "admin"):
-        if request.method == 'GET':
-            majors=[{"major_name": "Ingenieria informática"}, {"major_name":"ingeniería electrónica"}]
+            cursor.execute("SELECT nombre AS major_name FROM carrera")
+            majors = cursor.fetchall() 
             print("majors? ",majors)
             return render_template("admin/adminMajor/majorMenu.html", majors=majors)
-        else:
-            # User is not admin
-            return redirect(url_for("login.login"))
     else:
         return redirect(url_for("login.login"))
 
@@ -160,17 +158,6 @@ def admin_major_create():
         return redirect(url_for("login.login"))    
     
 
-@admin_bp.route("/major-edit") #implement major by id
-def admin_major_edit():
-    user_check = check_user(session)
-    if(user_check == "admin"):
-        if request.method == 'GET':
-            return render_template("admin/adminMajor/majorEdit.html")
-        else:
-            # User is not admin
-            return redirect(url_for("login.login"))
-    else:
-        return redirect(url_for("login.login"))   
     
 
 @admin_bp.route("/major-") #implement major by id
@@ -458,8 +445,12 @@ def admin_student_enroll(cedula):
             classes = cursor.fetchall()
             return render_template("admin/adminStudent/studentEnroll.html", classes=classes, student=student)
         else:
-            # User is not admin
-            return redirect(url_for("login.login"))
+            # Assuming POST method
+            class_id = request.form['materia']
+            enroll_student = "INSERT INTO materia_estudiante (materia, estudiante) VALUES (%s,%s)"
+            cursor.execute(enroll_student, (class_id, cedula,))
+            mysql.connection.commit()
+            return redirect(url_for("admin.admin_student_menu"))
     else:
         return redirect(url_for("login.login")) 
     
