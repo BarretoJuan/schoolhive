@@ -58,9 +58,18 @@ def login():
   
 
 
-@login_bp.route("/admin")
+@login_bp.route("/admin", methods=["GET","POST"])
 def login_admin():
-    return render_template("/auth/loginAdmin.html")
+    user_check = check_user(session)
+    if(user_check == "student"):
+        return redirect(url_for("student.student"))
+    elif(user_check == "professor"):
+        return redirect(url_for("professor.professor"))
+    elif(user_check == "admin"):
+        return redirect(url_for("admin.admin"))
+    else:
+        if request.method == "GET":
+            return render_template("/auth/loginAdmin.html")
 
 @login_bp.route("/student")
 def login_student():
