@@ -13,18 +13,18 @@
 
 ### Backend
 #### Administrator
-[ ] CRUD Student
+[ X ] CRUD Student
 
-[ ] CRUD Teacher
+[ X ] CRUD Teacher
 
-[ ] CRUD Major
+[ X ] CRUD Major
 
-[ ] CRUD Class
+[ X ] CRUD Class
 
-[ ] Assign Teachers
+[ X  ] Assign Teachers
 
-[ ] Enroll Students
+[ X ] Enroll Students
 
-[ ] Generate report by criteria
+[ X ] Generate report by criteria
 
 

@@ -361,17 +361,40 @@ def admin_section_create():
         return redirect(url_for("login.login"))  
 
 
-@admin_bp.route("/section-") #implement section by id
-def admin_section():
+@admin_bp.route("/section/<section_name>") #implement section by id
+def admin_section(section_name):
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     user_check = check_user(session)
     if(user_check == "admin"):
         if request.method == 'GET':
-            classes  = [{"nombre_materia":"calculo IV", "periodo":"1-2023", "profesor":"roberto jose", "num_participantes":"30"}, {"nombre_materia":"calculo IV", "periodo":"1-2023", "profesor":"roberto jose", "num_participantes":"10"}]
-            section = {"nombre":"C613", "carrera":"Ingeniería en computación"}
+            get_classes ='''
+       SELECT 
+	materia.seccion as seccion,
+    materia.id AS materia_id,
+    materia.nombre AS nombre_materia,
+    materia.periodo AS periodo,
+    profesor.nombre AS profesor,
+    profesor.apellido as profesor_apellido,   
+    COUNT(materia_estudiante.estudiante) AS num_participantes
+    FROM materia
+    JOIN materia_profesor ON materia.id = materia_profesor.materia
+    JOIN profesor ON materia_profesor.profesor = profesor.cedula
+    JOIN materia_estudiante ON materia.id = materia_estudiante.materia
+    where materia.seccion = 'C-613' 
+    GROUP BY materia.id, materia.nombre, materia.periodo, profesor.nombre
+    ORDER BY materia.periodo;
+
+
+             
+''' 
+            cursor.execute (get_classes)
+            classes = cursor.fetchall()
+
+            get_section = "select nombre as nombre, carrera as carrera from seccion where nombre = %s"
+            cursor.execute(get_section, (section_name,))
+            section = cursor.fetchone()
             return render_template("admin/adminSection/section.html", classes=classes, section=section)
-        else:
-            # User is not admin
-            return redirect(url_for("login.login"))
     else:
         return redirect(url_for("login.login"))  
 
