@@ -21,7 +21,7 @@
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
                     <!-- User dropdown menu -->
-                    <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown03" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">professor["user_name"]</a>
+                    <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown03" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{professor["user_name"]}}</a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown03">
                         <a class="dropdown-item" href="/professor/profile">Perfil</a>
                         <a class="dropdown-item" href="/login/logout">Cerrar sesión</a>
@@ -45,7 +45,7 @@
                 <li>
                     <div style="padding-right: 30px; padding-top: 10px;">
                         <!-- Create project button -->
-                        <a class="w-100 h-30 btn btn-sm btn-primary" id="printBtn" style="background-color: #813035; display: block; text-align: center; line-height: 20px;">Ver Planilla de Notas</a>
+                        <a class="w-100 h-30 btn btn-sm btn-primary" href="/professor/classForm/{{class_data['class_id']}}" style="background-color: #813035; display: block; text-align: center; line-height: 20px;">Ver Planilla de Notas</a>
                     </div>
                     
                 </li>
@@ -62,7 +62,7 @@
         <h3>Cédula: {{student['cedula']}}</h3>
 
         <div class="form-floating">
-            <input type="number" min="1" max="20" step="1" class="form-control" id="nota_{{student['cedula']}}" name="nota_{{student['cedula']}}" placeholder="nota_{{student['cedula']}}" value="{{student['nota']}}" required>
+            <input type="number" min="1" max="20" step="0.1" class="form-control" id="nota_{{student['cedula']}}" name="nota_{{student['cedula']}}" placeholder="nota_{{student['cedula']}}" value="{{student['nota']}}" required>
             <label for="nota_{{student['cedula']}}">Ingrese la nota del estudiante</label>
         </div>
     <div class="line mb-5"></div>

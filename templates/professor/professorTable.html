@@ -1,6 +1,6 @@
 {% extends './base.html' %}
 
-{% block title %}MajorAdminMenu{% endblock %}
+{% block title %}ProfessorTable{% endblock %}
 
 {% block customCSS %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
@@ -11,19 +11,19 @@
         <div class ="row">
             <div class = "col-sm-3">
                 <a class="alignleft"></a>
-                <a href="/admin/menu"><img src="{{ url_for('static', filename='img/schoolhive.png') }}" alt="" width="30" height="30"/></a>   
+                <a href="/professor/menu"><img src="{{ url_for('static', filename='img/schoolhive.png') }}" alt="" width="30" height="30"/></a>   
             </div>
             <div class = "col-sm-9" style="padding-top: 3px;">
-                <a class="navbar-brand" href="/admin/menu">Schoolhive</a>
+                <a class="navbar-brand" href="/professor/menu">Schoolhive</a>
             </div>
         </div>
         <div class="collapse navbar-collapse" id="navbarsExample03">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
                     <!-- User dropdown menu -->
-                    <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown03" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{admin["user_name"]}}</a>
+                    <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown03" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{session['nombre']}} {{session['apellido']}}</a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown03">
-                        <a class="dropdown-item" href="/admin/profile">Perfil</a>
+                        <a class="dropdown-item" href="/professor/profile">Perfil</a>
                         <a class="dropdown-item" href="/login/logout">Cerrar sesión</a>
                     </div>
                 </li>
@@ -32,16 +32,17 @@
     </nav> 
     <nav class="navbar navbar-expand-sm navbar-dark" style="background-color: #eeeeee;">
         <row>
-            <h5 class="alignleft "><strong>Carrera: </strong> {{major['nombre']}}</h5>
+            <h5 class="alignleft "><strong>Planilla de notas: </strong>{{class_data['nombre']}} {{class_data['seccion']}} {{class_data['periodo']}}</h5>
+            <h5 class="alignleft"><strong>Profesor: </strong>{{session['nombre']}} {{session['apellido']}}  {{session['cedula']}}</h5>
         </row> 
-            
+        
 
         <div class="collapse navbar-collapse" id="navbarsExample03">
             <ul class="navbar-nav ml-auto">
                 <li>
                     <div style="padding-right: 30px; padding-top: 10px;">
                         <!-- Create project button -->
-                        <a class="w-100 h-30 btn btn-sm btn-primary" id="printBtn" style="background-color: #813035; display: block; text-align: center; line-height: 20px;">Imprimir reporte de la carrera</a>
+                        <a class="w-100 h-30 btn btn-sm btn-primary" id="printBtn" style="background-color: #813035; display: block; text-align: center; line-height: 20px;">Imprimir planilla de la materia</a>
                     </div>
                     
                 </li>
@@ -52,55 +53,31 @@
        
     </nav>
     <div class="line"></div>
-
-    <h5 class="alignleft mt-3 "><strong>Estudiantes de la carrera: </strong></h5>
+    <h5 class="alignleft "><strong>Participantes de la materia: </strong></h5>
     <table class="ms-5 mt-5" style="border: 1px solid #813035; border-collapse: collapse; width:75%;">
         <tr>
-          <th>Nombre</th>
           <th>Cedula</th>
-       
+          <th>Nombre</th>
+          <th>Nota</th>
         </tr>
 
         {%for student in students%}
         <tr>
-            <td>{{student['nombre']}} {{student['apellido']}}</td>    
             <td>{{student['cedula']}}</td>
+            <td>{{student['nombre']}} {{student['apellido']}}</td>
+            <td>{{student['nota']}}</td>
         </tr>
         {%endfor%}
+      
+       
       </table>
 
-      <h5 class="alignleft mt-3"><strong>Secciones y materias de la carrera: </strong></h5>
-      <table class="ms-5 mt-5" style="border: 1px solid #813035; border-collapse: collapse; width:75%;">
-          <tr>
-            <th>Materia</th>
-            <th>Sección</th>
-            <th>Período</th>
-            <th>Profesor</th>
-            <th>Cédula Profesor</th>
-            <th>Número de Estudiantes</th>
-         
-          </tr>
-  
-          {%for class in classes%}
-          <tr>
-              <td>{{class['nombre']}}</td>    
-              <td>{{class['seccion']}}</td>
-              <td>{{class['periodo']}}</td>    
-              <td>{{class['profesor']}} {{class['profesor_apellido']}}</td>
-              <td>{{class['cedula_profesor']}}</td>    
-              <td>{{class['num_participantes']}}</td>
-          </tr>
-          {%endfor%}
-        </table>
-
-    
     <script>
         // JavaScript to handle button click event and trigger printing
         document.getElementById('printBtn').addEventListener('click', function() {
-             window.print();
-            });
+            window.print();
+        });
     </script>
-
     <!-- Include the necessary Bootstrap JavaScript and jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

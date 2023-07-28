@@ -49,8 +49,7 @@ def login_admin():
             email = request.form['username'] # Yeah, kinda tricky at first
             password = request.form['password']
             hashed_password = hashlib.sha1((password + current_app.secret_key).encode()).hexdigest()
-            print(hashed_password)
-            print("HAAAAAAA")
+
             cursor.execute("SELECT cedula, nombre, apellido, email FROM admin where email = %s AND password = %s", (email, hashed_password,))
             account = cursor.fetchone()
 
