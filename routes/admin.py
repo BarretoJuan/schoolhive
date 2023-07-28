@@ -132,7 +132,7 @@ def admin_class_menu():
             '''
             cursor.execute(get_classes)
             classes = cursor.fetchall()
-            return render_template("admin/adminClass/classMenu.html", classes=classes, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
+            return render_template("admin/adminClass/classMenu.html", classes=classes, admin = {**session,'user_name': session['nombre'] + ' ' + session['apellido']})
     else:
         # User is not adming
         return redirect(url_for("login.login"))

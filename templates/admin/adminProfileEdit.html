@@ -45,7 +45,7 @@
                 <div class="form-floating mt-2">
                     <input type="text" maxlength="45" class="form-control" id="nombre" name="nombre" placeholder="nombre" value="{{admin['nombre']}}" required>
                     <label for="nombre">Nombre</label>
-                </div>
+                </div>|
             </div>
             <div class="col-sm-6">
                 <div class="form-floating mt-2">
@@ -55,7 +55,7 @@
             </div>
         </div>
         <div class="form-floating mt-2">
-            <input type="text" class="form-control" maxlength="9" id="cedula" name="cedula" placeholder="cedula" value="{{admin['cedula']}}" readonly required>
+            <input type="number" min="0" max="999999999" class="form-control" id="cedula" name="cedula" placeholder="cedula" value="{{admin['cedula']}}" readonly required>
             <label for="apellido">admin_cedula</label>
         </div>    
        
