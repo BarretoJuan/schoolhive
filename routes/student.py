@@ -15,10 +15,31 @@ def student():
 
 @student_bp.route("/menu", methods = ['GET'])
 def student_dashboard():
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     user_check = check_user(session)
     if(user_check == "student"):
-            classes  = [{"nombre_materia":"calculo IV", "seccion":"n613", "periodo":"1-2023","profesor":"pedro gomez","cedula_profesor":"555","nota":"15"}, {"nombre_materia":"calculo IV", "seccion":"n613", "periodo":"1-2023","profesor":"pedro gomez","cedula_profesor":"5535","nota":"05"},{"nombre_materia":"calculo IV", "seccion":"n613", "periodo":"2-2023","profesor":"pedro gomez","cedula_profesor":"555","nota":"20"}, {"nombre_materia":"calculo IV", "seccion":"n613", "periodo":"3-2023","profesor":"pedro gomez","cedula_profesor":"555","nota":"12"}]
-            return render_template("student/studentDashboard.html", classes=classes)
+            get_classes = """
+            SELECT 
+            materia.id as id_materia,
+            materia.nombre as nombre_materia,
+            materia.seccion as seccion,
+            materia.periodo as periodo,
+            profesor.nombre as profesor,
+            profesor.apellido as apellido_profesor,
+            profesor.cedula as cedula_profesor,
+            materia_estudiante.nota as nota
+            from materia
+            join materia_profesor on materia_profesor.materia = materia.id
+            join materia_estudiante on materia_estudiante.materia = materia.id
+            join estudiante on estudiante.cedula = materia_estudiante.estudiante
+            join profesor on profesor.cedula = materia_profesor.profesor
+            where materia_estudiante.estudiante = %s
+            order by materia.periodo, materia.nombre
+"""
+            cursor.execute(get_classes, (session['cedula'],))
+            classes = cursor.fetchall()
+            return render_template("student/studentDashboard.html", classes=classes, session=session)
     else:
         return redirect(url_for("login.login"))    
 

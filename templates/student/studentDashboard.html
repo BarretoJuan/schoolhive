@@ -32,6 +32,8 @@
     </nav> 
     <nav class="navbar navbar-expand-sm navbar-dark" style="background-color: #eeeeee;">
         <row>
+            <h3>{{session['nombre']}} {{session['apellido']}}</h3>
+            <h3>Cédula: {{session['cedula']}}</h3>
             <h3 class="alignleft">Tus calificaciones:</h3>
         </row> 
 
@@ -41,7 +43,7 @@
                 <li>
                     <div style="padding-right: 30px; padding-top: 10px;">
                         <!-- Create project button -->
-                        <a class="w-100 h-30 btn btn-sm btn-primary" id="printBtn" style="background-color: #813035; display: block; text-align: center; line-height: 20px;">Generar Constancia de Notas</a>
+                        <a class="w-100 h-30 btn btn-sm btn-primary" id="printBtn" style="background-color: #813035; display: block; text-align: center; line-height: 20px;">Imprimir Constancia de Notas</a>
                     </div>
                     
                 </li>
@@ -66,7 +68,7 @@
             <td>{{class['nombre_materia']}}</td>
             <td>{{class['seccion']}}</td>
             <td>{{class['periodo']}}</td>
-            <td>{{class['profesor']}}</td>
+            <td>{{class['profesor']}} {{class['apellido_profesor']}}</td>
             <td>{{class['cedula_profesor']}}</td>
             <td>{{class['nota']}}</td>
         </tr>
