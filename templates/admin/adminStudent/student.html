@@ -32,7 +32,7 @@
     </nav> 
     <nav class="navbar navbar-expand-sm navbar-dark" style="background-color: #eeeeee;">
         <row>
-            <h5 class="alignleft "><strong>Profesor: </strong> {{student['nombre']}}</h5>
+            <h5 class="alignleft "><strong>Estudiante: </strong> {{student['nombre']}} {{student['apellido']}}</h5>
             <h5 class="alignleft"><strong>Cédula: </strong> {{student['cedula']}}</h5>
             <h5 class="alignleft"><strong>Materias en las que participa: </strong> </h5>
         </row> 
@@ -44,7 +44,7 @@
                 <li>
                     <div style="padding-right: 30px; padding-top: 10px;">
                         <!-- Create project button -->
-                        <a class="w-100 h-30 btn btn-sm btn-primary" href="/admin/generate-student-report" style="background-color: #813035; display: block; text-align: center; line-height: 20px;">Generar Reporte del Estudiante</a>
+                        <a class="w-100 h-30 btn btn-sm btn-primary" id="printBtn" style="background-color: #813035; display: block; text-align: center; line-height: 20px;">Imprimir Reporte del Estudiante</a>
                     </div>
                     
                 </li>
@@ -60,6 +60,7 @@
           <th>Materia</th>
           <th>Sección</th>
           <th>Período</th>
+          <th>Nota</th>
          
         </tr>
 
@@ -68,6 +69,7 @@
             <td>{{class['nombre_materia']}}</td>
             <td>{{class['seccion']}}</td>
             <td>{{class['periodo']}}</td>
+            <td>{{class['nota']}}</td>
         </tr>
         {%endfor%}
       
@@ -76,6 +78,13 @@
 
 
     <!-- Include the necessary Bootstrap JavaScript and jQuery -->
+    <script>
+        // JavaScript to handle button click event and trigger printing
+        document.getElementById('printBtn').addEventListener('click', function() {
+            window.print();
+        });
+    </script>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>

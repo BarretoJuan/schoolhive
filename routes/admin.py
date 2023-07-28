@@ -5,6 +5,9 @@ import hashlib
 import re
 from lib.check_user import check_user
 
+
+
+
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
 #ADMIN ROUTES
@@ -455,19 +458,35 @@ def admin_student_enroll(cedula):
         return redirect(url_for("login.login")) 
     
 
-@admin_bp.route("/student-") #implement student by id
-def admin_student():
+@admin_bp.route("/student/<cedula>")
+def admin_student(cedula):
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     user_check = check_user(session)
-    if(user_check == "admin"):
+    if user_check == "admin":
         if request.method == 'GET':
-            classes  = [{"nombre_materia":"calculo IV", "seccion":"n613", "periodo":"1-2023"}, {"nombre_materia":"calculo III", "seccion":"n613", "periodo":"1-2023"}]
-            student = {"nombre":"José José", "cedula":"5478487"}
-            return render_template("admin/adminStudent/student.html", classes=classes, student=student)
-        else:
-            # User is not admin
-            return redirect(url_for("login.login"))
+            get_student = "SELECT nombre, apellido, cedula FROM estudiante WHERE cedula = %s"
+            cursor.execute(get_student, (cedula,))
+            student = cursor.fetchone()
+            get_classes = '''
+                SELECT 
+                    materia_estudiante.estudiante,
+                    materia.nombre as nombre_materia,
+                    materia.seccion as seccion,
+                    materia.periodo as periodo,
+                    materia_estudiante.nota as nota
+                FROM materia
+                INNER JOIN materia_estudiante ON materia_estudiante.materia = materia.id
+                WHERE materia_estudiante.estudiante = %s
+                ORDER BY materia.periodo
+            '''
+            cursor.execute(get_classes, (cedula,))
+            classes = cursor.fetchall()
+        return render_template("admin/adminStudent/student.html", student=student, classes=classes)
+
+        
     else:
-        return redirect(url_for("login.login")) 
+        return redirect(url_for("login.login"))
 
 #ADMIN/TERM ROUTES
 @admin_bp.route("/term-menu", methods = ['GET'])
