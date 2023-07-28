@@ -103,15 +103,40 @@ def admin_class_assign():
 
 @admin_bp.route("/class/<id>") #implement major by id
 def admin_class(id):
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     user_check = check_user(session)
     if(user_check == "admin"):
         if request.method == 'GET':
-            classs = {"nombre":"Calculo IV", "periodo":"1-2023","seccion":"n-613","profesor":"jose jose"}
-            students = [{"nombre":"student1", "cedula":"5566"},{"nombre":"student2", "cedula":"55466"}]
-            return render_template("admin/adminClass/class.html", classs=classs, students=students)
-        else:
-            # User is not admin
-            return redirect(url_for("login.login"))
+            get_class_data = """
+            SELECT materia.nombre as nombre,
+            materia.id as id,
+            materia.periodo as periodo,
+            materia.seccion as seccion,
+            profesor.nombre as profesor,
+            profesor.apellido as profesor_apellido
+            from materia
+            join materia_profesor on materia_profesor.materia = materia.id
+            join profesor on profesor.cedula = materia_profesor.profesor
+            where materia = %s
+            """
+            cursor.execute(get_class_data, (id,))
+            class_data = cursor.fetchone()
+
+            get_student_data = '''
+            SELECT 
+            estudiante.nombre as nombre,
+            estudiante.cedula as cedula,
+            estudiante.apellido as apellido
+            from estudiante
+            join materia_estudiante on materia_estudiante.estudiante = estudiante.cedula
+            where materia_estudiante.materia = %s
+            order by estudiante.apellido
+'''
+
+            cursor.execute(get_student_data, (id,))
+            students = cursor.fetchall()
+            return render_template("admin/adminClass/class.html", class_data=class_data, students=students)
     else:
         return redirect(url_for("login.login"))
     

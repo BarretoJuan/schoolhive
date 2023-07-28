@@ -32,13 +32,13 @@
     </nav> 
     <nav class="navbar navbar-expand-sm navbar-dark" style="background-color: #eeeeee;">
         <row>
-            <h5 class="alignleft "><strong>Materia: </strong>{{classs['nombre']}}</h5>
-            <h5 class="alignleft"><strong>Sección: </strong>{{classs['seccion']}}</h5>
-            <h5 class="alignleft"><strong>Período: </strong>{{classs['periodo']}}</h5>
+            <h5 class="alignleft "><strong>Materia: </strong>{{class_data['nombre']}}</h5>
+            <h5 class="alignleft"><strong>Sección: </strong>{{class_data['seccion']}}</h5>
+            <h5 class="alignleft"><strong>Período: </strong>{{class_data['periodo']}}</h5>
         </row> 
             
         <div class="collapse navbar-collapse" id="navbarsExample03">
-            <h5 class="ms-5"><strong>Profesor: </strong>{{classs['profesor']}}</h5>
+            <h5 class="ms-5"><strong>Profesor: </strong>{{class_data['profesor']}} {{class_data['profesor_apellido']}}</h5>
         </div>
 
         <div class="collapse navbar-collapse" id="navbarsExample03">
@@ -68,7 +68,7 @@
 
         {%for student in students%}
         <tr>
-            <td>{{student['nombre']}}</td>
+            <td>{{student['nombre']}} {{student['apellido']}}</td>
             <td>{{student['cedula']}}</td>
         </tr>
         {%endfor%}
