@@ -49,7 +49,7 @@ def admin_class_menu():
     user_check = check_user(session)
     if(user_check == "admin"):
             get_classes = '''
-            SELECT materia.nombre AS class_name, materia.seccion AS section_name, materia.periodo AS term_name, profesor.nombre AS professor_name, COUNT(materia_estudiante.estudiante) AS student_count 
+            SELECT materia.id AS class_id, materia.nombre AS class_name, materia.seccion AS section_name, materia.periodo AS term_name, profesor.nombre AS professor_name, profesor.apellido as professor_last_name, COUNT(materia_estudiante.estudiante) AS student_count 
             FROM materia 
             JOIN materia_profesor 
             ON materia_profesor.materia = materia.id
@@ -57,8 +57,6 @@ def admin_class_menu():
             JOIN profesor ON profesor.cedula = materia_profesor.profesor 
             GROUP BY materia_estudiante.materia
             '''
-            
-
             cursor.execute(get_classes)
             classes = cursor.fetchall()
             return render_template("admin/adminClass/classMenu.html", classes=classes)
@@ -103,8 +101,8 @@ def admin_class_assign():
    
     
 
-@admin_bp.route("/class-") #implement major by id
-def admin_class():
+@admin_bp.route("/class/<id>") #implement major by id
+def admin_class(id):
     user_check = check_user(session)
     if(user_check == "admin"):
         if request.method == 'GET':
@@ -128,7 +126,6 @@ def admin_major_menu():
     if(user_check == "admin"):
             cursor.execute("SELECT nombre AS major_name FROM carrera")
             majors = cursor.fetchall() 
-            print("majors? ",majors)
             return render_template("admin/adminMajor/majorMenu.html", majors=majors)
     else:
         return redirect(url_for("login.login"))
@@ -297,22 +294,17 @@ def admin_professor(cedula):
             materia.periodo AS periodo
             FROM materia
             INNER JOIN materia_profesor ON materia_profesor.materia = materia.id
-            WHERE materia.profesor_profesor = %s
+            WHERE materia_profesor.profesor = %s
             ORDER BY materia.periodo
             """
             cursor.execute(get_classes, (cedula,))
             classes = cursor.fetchall()
 
-            get_professor = """
+            get_professor = " SELECT nombre as nombre, cedula as cedula, apellido as apellido FROM profesor where cedula = %s"
             
-            """
+            cursor.execute(get_professor, (cedula,))
+            professor=cursor.fetchone()
 
-
-
-        
-
-            classes  = [{"nombre_materia":"calculo IV", "seccion":"n613", "periodo":"1-2023"}, {"nombre_materia":"calculo III", "seccion":"n613", "periodo":"1-2023"}]
-            professor = {"nombre":"José José", "cedula":"5478487"}
             return render_template("admin/adminProfessor/professor.html", classes=classes, professor=professor)
     else:
         # User is not admin
@@ -472,13 +464,12 @@ def admin_student_enroll(cedula):
         else:
             # Assuming POST method
             class_id = request.form['materia']
-            enroll_student = "INSERT INTO materia_estudiante (materia, estudiante) VALUES (%s,%s)"
+            enroll_student = "INSERT INTO materia_estudiante (materia, estudiante, nota) VALUES (%s,%s, 0)"
             cursor.execute(enroll_student, (class_id, cedula,))
             mysql.connection.commit()
             return redirect(url_for("admin.admin_student_menu"))
     else:
         return redirect(url_for("login.login")) 
-    
 
 @admin_bp.route("/student/<cedula>")
 def admin_student(cedula):

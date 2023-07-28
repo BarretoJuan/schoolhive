@@ -33,11 +33,11 @@
     <nav class="navbar navbar-expand-sm navbar-dark" style="background-color: #eeeeee;">
         <row>
             <h3 class="alignleft">Carga de notas:</h3>
-            <h3 class="alignleft">Class_name  section_name</h3>
+            <h3 class="alignleft">{{class_data['class_name']}} {{class_data['class_section']}}</h3>
         </row> 
 
         <div class="collapse navbar-collapse" id="navbarsExample03">
-            <h3 class="alignleft" style="padding-left: 50px;">Período: term_name</h3>
+            <h3 class="alignleft" style="padding-left: 50px;">Período: {{class_data['class_term']}}</h3>
         </div>
 
         <div class="collapse navbar-collapse" id="navbarsExample03">
@@ -45,7 +45,7 @@
                 <li>
                     <div style="padding-right: 30px; padding-top: 10px;">
                         <!-- Create project button -->
-                        <a class="w-100 h-30 btn btn-sm btn-primary" id="printBtn" style="background-color: #813035; display: block; text-align: center; line-height: 20px;">Generar Planilla de Notas</a>
+                        <a class="w-100 h-30 btn btn-sm btn-primary" id="printBtn" style="background-color: #813035; display: block; text-align: center; line-height: 20px;">Ver Planilla de Notas</a>
                     </div>
                     
                 </li>
@@ -56,14 +56,14 @@
     </nav>
     <div class="line"></div>
     
-    <form class="form-signin" action="/professor/class/" method="POST">
+    <form class="form-signin" action="/professor/class/{{class_data['class_id']}}/{{class_data['class_section']}}/{{class_data['class_term']}}" method="POST">
         {%for student in students%}
-        <h3>Estudiante: {{student['name']}}</h3>
+        <h3>Estudiante: {{student['name']}} {{student['last_name']}}</h3>
         <h3>Cédula: {{student['cedula']}}</h3>
 
         <div class="form-floating">
-            <input type="number" min="1" max="20" step="1" class="form-control" id="nota" name="nota" placeholder="nota" value="{{student['nota']}}" required>
-            <label for="numPeriodo">Ingrese la nota del estudiante</label>
+            <input type="number" min="1" max="20" step="1" class="form-control" id="nota_{{student['cedula']}}" name="nota_{{student['cedula']}}" placeholder="nota_{{student['cedula']}}" value="{{student['nota']}}" required>
+            <label for="nota_{{student['cedula']}}">Ingrese la nota del estudiante</label>
         </div>
     <div class="line mb-5"></div>
         {%endfor%}
