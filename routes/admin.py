@@ -20,7 +20,7 @@ def admin_dashboard():
     user_check = check_user(session)
     if(user_check == "admin"):
         if request.method == 'GET':
-            return render_template("admin/adminDashboard.html")
+            return render_template("admin/adminDashboard.html", admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
         else:
             # User is not admin
             return redirect(url_for("login.login"))
@@ -28,15 +28,88 @@ def admin_dashboard():
         return redirect(url_for("login.login"))
     
 
-@admin_bp.route("/profile")
+@admin_bp.route("/profile", methods = ['GET','POST'])
 def admin_profile():
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     user_check = check_user(session)
     if(user_check == "admin"):
         if request.method == 'GET':
-            return render_template("admin/adminProfileEdit.html")
+            return render_template("admin/adminProfileEdit.html", admin = {**session, 'user_name': session['nombre'] + ' ' + session['apellido']})
         else:
-            # User is not admin
-            return redirect(url_for("login.login"))
+            admin_email = request.form["email"]
+            admin_name = request.form["nombre"]
+            admin_last_name = request.form["apellido"]
+            admin_cedula = request.form["cedula"]
+            admin_current_password = request.form["password"]
+            admin_new_password = request.form["newPassword"]
+            admin_confirm_password = request.form["confirmarNewPassword"]
+            
+            if not (admin_new_password == admin_confirm_password):
+             return render_template("admin/adminProfileEdit.html",msg = "Las contraseñas no coinciden" , admin = {**session,'user_name': session['nombre'] + ' ' + session['apellido']})
+            
+            # Check if the current password is correct
+            hashed_password = hashlib.sha1((admin_current_password + current_app.secret_key).encode()).hexdigest()
+            query_check_password = "SELECT password FROM admin WHERE cedula = %s"
+            cursor.execute(query_check_password, (session['cedula'],))
+            db_password = cursor.fetchone()
+
+            if hashed_password == db_password['password']:
+                # check if the old password is NOT going to be updated
+
+                if not admin_new_password:
+                    check_email = """SELECT EXISTS( SELECT 1 FROM admin WHERE email = %s) as exist"""
+                    cursor.execute(check_email, (admin_email,))
+                    email_exist = cursor.fetchone()
+                    if email_exist['exist']:
+                        if(admin_email == session['email']):
+                            query_admin_update = """
+                            UPDATE admin
+                            SET nombre = %s, apellido = %s
+                            WHERE cedula = %s
+                            """
+                            cursor.execute(query_admin_update,(admin_name,admin_last_name,admin_cedula))
+                            mysql.connection.commit()
+                        else: 
+                            return render_template("admin/adminProfileEdit.html",msg = "El email ya esta en uso" , admin = {**session,'user_name': session['nombre'] + ' ' + session['apellido']})
+                    else:
+                        query_admin_update = """
+                        UPDATE admin
+                        SET nombre = %s, apellido = %s, email = %s
+                        WHERE cedula = %s
+                        """
+                        cursor.execute(query_admin_update,(admin_name,admin_last_name,admin_email,admin_cedula))
+                        mysql.connection.commit()
+                else:
+                    check_email = """SELECT EXISTS( SELECT 1 FROM admin WHERE email = %s) as exist"""
+                    cursor.execute(check_email, (admin_email,))
+                    email_exist = cursor.fetchone()
+                    if email_exist['exist']:
+                        if (admin_email == session['email']):
+                            query_admin_update = """
+                            UPDATE admin
+                            SET nombre = %s, apellido = %s, password = %s
+                            WHERE cedula = %s
+                            """
+                            new_hashed_password = hashlib.sha1((admin_new_password + current_app.secret_key).encode()).hexdigest()
+                            cursor.execute(query_admin_update,(admin_name,admin_last_name,new_hashed_password,admin_cedula))
+                            mysql.connection.commit()
+                        else:
+                            return render_template("admin/adminProfileEdit.html",msg = "El email ya esta en uso" , admin = {**session,'user_name': session['nombre'] + ' ' + session['apellido']})
+                    else:
+                        query_admin_update = """
+                        UPDATE admin
+                        SET nombre = %s, apellido = %s, email = %s, password = %s
+                        WHERE cedula = %s
+                    """
+                        new_hashed_password = hashlib.sha1((admin_new_password + current_app.secret_key).encode()).hexdigest()
+                        cursor.execute(query_admin_update,(admin_name,admin_last_name,admin_email,new_hashed_password,admin_cedula))
+                        mysql.connection.commit()
+                
+                return redirect(url_for('login.logout'))
+            else:
+                  return render_template("admin/adminProfileEdit.html",msg = "La contraseña incorrecta" , admin = {**session,'user_name': session['nombre'] + ' ' + session['apellido']})
+
     else:
         return redirect(url_for("login.login"))
     
@@ -59,9 +132,9 @@ def admin_class_menu():
             '''
             cursor.execute(get_classes)
             classes = cursor.fetchall()
-            return render_template("admin/adminClass/classMenu.html", classes=classes)
+            return render_template("admin/adminClass/classMenu.html", classes=classes, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
     else:
-        # User is not adminf
+        # User is not adming
         return redirect(url_for("login.login"))
 
 @admin_bp.route("/class-assign", methods = ['GET', 'POST']) #implement major by id
@@ -77,7 +150,7 @@ def admin_class_assign():
 
     if(user_check == "admin"):
         if request.method == 'GET':       
-            return render_template("admin/adminClass/classAssign.html", sections=sections, terms=terms)
+            return render_template("admin/adminClass/classAssign.html", sections=sections, terms=terms, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
         else:
             class_name = request.form['nombreMateria']
             class_section = request.form['seccion']
@@ -86,6 +159,8 @@ def admin_class_assign():
             check_class = "SELECT EXISTS (SELECT 1 FROM materia WHERE nombre = %s AND seccion = %s AND periodo = %s) AS exist"
             cursor.execute(check_class, (class_name, class_section, class_term,))
             class_exists = cursor.fetchone()
+            print("/ ", class_exists['exist'])
+            
 
             if not class_exists["exist"]:
                 query = "INSERT INTO materia (nombre, seccion, periodo) VALUES (%s,%s,%s)"
@@ -94,7 +169,7 @@ def admin_class_assign():
                 return redirect(url_for("admin.admin_class_menu"))
             else:
                 log_msg = "Esta materia ya existe."
-                return render_template("admin/adminClass/classAssign.html", sections=sections, terms=terms, msg=log_msg)
+                return render_template("admin/adminClass/classAssign.html", sections=sections, terms=terms, msg=log_msg, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
     else:
         # User is not admin
         return redirect(url_for("login.login"))
@@ -136,7 +211,7 @@ def admin_class(id):
 
             cursor.execute(get_student_data, (id,))
             students = cursor.fetchall()
-            return render_template("admin/adminClass/class.html", class_data=class_data, students=students)
+            return render_template("admin/adminClass/class.html", class_data=class_data, students=students, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
     else:
         return redirect(url_for("login.login"))
     
@@ -151,7 +226,7 @@ def admin_major_menu():
     if(user_check == "admin"):
             cursor.execute("SELECT nombre AS major_name FROM carrera")
             majors = cursor.fetchall() 
-            return render_template("admin/adminMajor/majorMenu.html", majors=majors)
+            return render_template("admin/adminMajor/majorMenu.html", majors=majors, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
     else:
         return redirect(url_for("login.login"))
 
@@ -163,7 +238,7 @@ def admin_major_create():
     user_check = check_user(session)
     if(user_check == "admin"):
         if request.method == 'GET':
-            return render_template("admin/adminMajor/majorCreate.html")
+            return render_template("admin/adminMajor/majorCreate.html", admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
         else: # We assume they cannot send any other method but post
             major_name = request.form['nombreCarrera']
             query_major_exist = "SELECT EXISTS(SELECT 1 FROM carrera WHERE nombre = %s) AS exist"
@@ -176,7 +251,7 @@ def admin_major_create():
                 return redirect(url_for("admin.admin_major_menu"))
             else:
                log_msg = "Esta carrera ya existe" # It already exist
-               return render_template("admin/adminMajor/majorCreate.html", msg = log_msg)
+               return render_template("admin/adminMajor/majorCreate.html", msg = log_msg, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
             
     else:
         # User is not admin
@@ -194,7 +269,6 @@ def admin_major(name):
         if request.method == 'GET':
             cursor.execute("SELECT nombre as nombre from carrera where nombre = %s", (name,))
             major = cursor.fetchone()
-            print("major?" , major)
 
             get_student_data = """
             SELECT
@@ -231,10 +305,7 @@ def admin_major(name):
 '''
             cursor.execute(get_classes_data, (name,))
             classes = cursor.fetchall()
-            return render_template("admin/adminMajor/major.html", major=major,students=students,classes=classes)
-        else:
-            # User is not admin
-            return redirect(url_for("login.login"))
+            return render_template("admin/adminMajor/major.html", major=major,students=students,classes=classes, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
     else:
         return redirect(url_for("login.login"))   
 
@@ -253,7 +324,7 @@ def admin_professor_menu():
             cursor.execute(get_professors)
             professors=cursor.fetchall()
 
-            return render_template("admin/adminProfessor/professorMenu.html", professors=professors)
+            return render_template("admin/adminProfessor/professorMenu.html", professors=professors, admin = {'user_name': session['nombre'] + ' ' + session['apellido']} )
     else:
         return redirect(url_for("login.login"))   
     
@@ -268,8 +339,8 @@ def admin_professor_create():
 
     if(user_check == "admin"):
         if request.method == 'GET':
-            return render_template("admin/adminProfessor/professorCreate.html")
-        elif request.method == 'POST':
+            return render_template("admin/adminProfessor/professorCreate.html", admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
+        else:
             professor_name = request.form["nombre"]
             professor_last_name = request.form["apellido"]
             professor_id = request.form["cedula"]
@@ -280,14 +351,15 @@ def admin_professor_create():
             
             cursor.execute("SELECT EXISTS (SELECT 1 FROM profesor WHERE cedula = %s) AS exist", (professor_id,))
             cedula_exists = cursor.fetchone()
-
-            if cedula_exists['exist'] == 1:
+            if cedula_exists['exist']:
                 log_msg = "Esta cédula ya está en uso."
                 error_flag = True 
-    
-            cursor.execute("SELECT EXISTS (SELECT 1 FROM profesor WHERE email = %s) AS exist", (professor_id,))
+
+        
+            cursor.execute("SELECT EXISTS (SELECT 1 FROM profesor WHERE email = %s) AS exist", (professor_email,))
+
             email_exists = cursor.fetchone()
-            if email_exists['exist'] == 1:
+            if email_exists['exist']:
                 log_msg = "Este email ya está en uso."
                 error_flag = True 
             
@@ -296,15 +368,12 @@ def admin_professor_create():
                 error_flag = True 
 
             if error_flag:
-                return render_template("admin/adminProfessor/professorCreate.html", msg = log_msg)
+                return render_template("admin/adminProfessor/professorCreate.html", msg = log_msg, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
             else:
                 insert_professor = "INSERT INTO profesor(cedula, nombre, apellido, email, password) VALUES(%s, %s, %s, %s, %s)"
                 cursor.execute(insert_professor, (professor_id, professor_name, professor_last_name, professor_email, professor_hash))
                 mysql.connection.commit()
                 return redirect(url_for("admin.admin_professor_menu"))
-        else:
-            # User is not admin
-            return redirect(url_for("login.login"))
 
     else:
         return redirect(url_for("login.login"))
@@ -325,7 +394,7 @@ def admin_professor_enroll(cedula):
 
     if(user_check == "admin"):
         if request.method == 'GET':
-            return render_template("admin/adminProfessor/professorEnroll.html", classes=classes, professor=professor)
+            return render_template("admin/adminProfessor/professorEnroll.html", classes=classes, professor=professor, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
         else:
             class_id = request.form["materia"]
             check_if_class_has_professor = "SELECT EXISTS (SELECT 1 FROM materia_profesor WHERE materia = %s) AS exist"
@@ -368,7 +437,7 @@ def admin_professor(cedula):
             cursor.execute(get_professor, (cedula,))
             professor=cursor.fetchone()
 
-            return render_template("admin/adminProfessor/professor.html", classes=classes, professor=professor)
+            return render_template("admin/adminProfessor/professor.html", classes=classes, professor=professor, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
     else:
         # User is not admin
         return redirect(url_for("login.login"))
@@ -385,7 +454,7 @@ def admin_section_menu():
             get_sections = "SELECT nombre as section_name FROM seccion"
             cursor.execute(get_sections)
             sections = cursor.fetchall()
-            return render_template("admin/adminSection/sectionMenu.html", sections=sections)
+            return render_template("admin/adminSection/sectionMenu.html", sections=sections, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
         else:
             # User is not admin
             return redirect(url_for("login.login"))
@@ -403,21 +472,21 @@ def admin_section_create():
     user_check = check_user(session)
     if(user_check == "admin"):
         if request.method == 'GET':
-            return render_template("admin/adminSection/sectionCreate.html", majors = majors)
+            return render_template("admin/adminSection/sectionCreate.html", majors = majors, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
         else:
             section_name = request.form["nombreSeccion"]
             section_major = request.form["carrera"]
             query_section_exists = "SELECT EXISTS (SELECT 1 FROM seccion WHERE nombre = %s) AS exist"
             cursor.execute(query_section_exists, (section_name,))
             section_exists = cursor.fetchone()
-            if not section_exists['exist']:
+            if section_exists['exist'] == 0:
                 insert_section = "INSERT INTO seccion(nombre, carrera) VALUES (%s, %s)"
                 cursor.execute(insert_section, (section_name, section_major))
                 mysql.connection.commit()
                 return redirect(url_for("admin.admin_section_menu"))
             else:
                 log_msg = "Esta sección ya existe."
-                return render_template("admin/adminSection/sectionCreate.html", majors = majors, msg=log_msg)
+                return render_template("admin/adminSection/sectionCreate.html", majors = majors, msg=log_msg, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
 
     else:
         # User is not admin
@@ -432,32 +501,32 @@ def admin_section(section_name):
     if(user_check == "admin"):
         if request.method == 'GET':
             get_classes ='''
-       SELECT 
-	materia.seccion as seccion,
-    materia.id AS materia_id,
-    materia.nombre AS nombre_materia,
-    materia.periodo AS periodo,
-    profesor.nombre AS profesor,
-    profesor.apellido as profesor_apellido,   
-    COUNT(materia_estudiante.estudiante) AS num_participantes
-    FROM materia
-    JOIN materia_profesor ON materia.id = materia_profesor.materia
-    JOIN profesor ON materia_profesor.profesor = profesor.cedula
-    JOIN materia_estudiante ON materia.id = materia_estudiante.materia
-    where materia.seccion = %s 
-    GROUP BY materia.id, materia.nombre, materia.periodo, profesor.nombre
-    ORDER BY materia.periodo;
+                SELECT 
+                materia.seccion as seccion,
+                materia.id AS materia_id,
+                materia.nombre AS nombre_materia,
+                materia.periodo AS periodo,
+                profesor.nombre AS profesor,
+                profesor.apellido as profesor_apellido,   
+                COUNT(materia_estudiante.estudiante) AS num_participantes
+                FROM materia
+                JOIN materia_profesor ON materia.id = materia_profesor.materia
+                JOIN profesor ON materia_profesor.profesor = profesor.cedula
+                JOIN materia_estudiante ON materia.id = materia_estudiante.materia
+                where materia.seccion = %s 
+                GROUP BY materia.id, materia.nombre, materia.periodo, profesor.nombre
+                ORDER BY materia.periodo;
 
 
-             
-''' 
+                        
+            ''' 
             cursor.execute (get_classes, (section_name,))
             classes = cursor.fetchall()
 
             get_section = "select nombre as nombre, carrera as carrera from seccion where nombre = %s"
             cursor.execute(get_section, (section_name,))
             section = cursor.fetchone()
-            return render_template("admin/adminSection/section.html", classes=classes, section=section)
+            return render_template("admin/adminSection/section.html", classes=classes, section=section, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
     else:
         return redirect(url_for("login.login"))  
 
@@ -471,7 +540,7 @@ def admin_student_menu():
         get_students = "SELECT nombre as student_name, apellido as student_last_name, cedula as student_cedula from estudiante"
         cursor.execute(get_students)
         students = cursor.fetchall()
-        return render_template("admin/adminStudent/studentMenu.html", students=students)     
+        return render_template("admin/adminStudent/studentMenu.html", students=students, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})     
        
     else:
         return redirect(url_for("login.login"))  
@@ -490,7 +559,7 @@ def admin_student_create():
             '''
             cursor.execute(get_majors)
             majors=cursor.fetchall()
-            return render_template("admin/adminStudent/studentCreate.html", majors=majors)
+            return render_template("admin/adminStudent/studentCreate.html", majors=majors, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
               
         elif request.method == 'POST':
             student_name = request.form["nombre"]
@@ -509,7 +578,7 @@ def admin_student_create():
                 log_msg = "Esta cédula ya está en uso."
                 error_flag = True 
     
-            cursor.execute("SELECT EXISTS (SELECT 1 FROM estudiante WHERE email = %s) AS exist", (student_id,))
+            cursor.execute("SELECT EXISTS (SELECT 1 FROM estudiante WHERE email = %s) AS exist", (student_email,))
             email_exists = cursor.fetchone()
             if email_exists['exist'] == 1:
                 log_msg = "Este email ya está en uso."
@@ -520,7 +589,7 @@ def admin_student_create():
                 error_flag = True 
 
             if error_flag:
-                return render_template("admin/adminStudent/studentCreate.html", msg = log_msg)
+                return render_template("admin/adminStudent/studentCreate.html", msg = log_msg, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
             else:
                 insert_student = "INSERT INTO estudiante(cedula, nombre, apellido, email, password, carrera) VALUES(%s, %s, %s, %s, %s, %s)"
                 cursor.execute(insert_student, (student_id, student_name, student_last_name, student_email, student_hash, student_major))
@@ -546,7 +615,7 @@ def admin_student_enroll(cedula):
             get_classes = "SELECT id AS class_id, seccion as class_section, periodo as class_term, nombre as class_name FROM materia WHERE NOT EXISTS(SELECT materia FROM materia_estudiante WHERE materia.id = materia_estudiante.materia AND materia_estudiante.estudiante = %s)"
             cursor.execute(get_classes, (cedula,))
             classes = cursor.fetchall()
-            return render_template("admin/adminStudent/studentEnroll.html", classes=classes, student=student)
+            return render_template("admin/adminStudent/studentEnroll.html", classes=classes, student=student, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
         else:
             # Assuming POST method
             class_id = request.form['materia']
@@ -569,11 +638,11 @@ def admin_student(cedula):
             student = cursor.fetchone()
             get_classes = '''
                 SELECT 
-                    materia_estudiante.estudiante,
-                    materia.nombre as nombre_materia,
-                    materia.seccion as seccion,
-                    materia.periodo as periodo,
-                    materia_estudiante.nota as nota
+                materia_estudiante.estudiante,
+                materia.nombre as nombre_materia,
+                materia.seccion as seccion,
+                materia.periodo as periodo,
+                materia_estudiante.nota as nota
                 FROM materia
                 INNER JOIN materia_estudiante ON materia_estudiante.materia = materia.id
                 WHERE materia_estudiante.estudiante = %s
@@ -581,7 +650,7 @@ def admin_student(cedula):
             '''
             cursor.execute(get_classes, (cedula,))
             classes = cursor.fetchall()
-        return render_template("admin/adminStudent/student.html", student=student, classes=classes)
+        return render_template("admin/adminStudent/student.html", student=student, classes=classes, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
 
         
     else:
@@ -597,7 +666,7 @@ def admin_term_menu():
             get_terms = "SELECT nombre as term_name FROM periodo"
             cursor.execute(get_terms)
             terms = cursor.fetchall()
-            return render_template("admin/adminTerm/termMenu.html", terms=terms)
+            return render_template("admin/adminTerm/termMenu.html", terms=terms, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
     else:
         return redirect(url_for("login.login")) 
 
@@ -608,7 +677,7 @@ def admin_term_create():
     user_check = check_user(session)
     if(user_check == "admin"):
         if request.method == 'GET':
-            return render_template("admin/adminTerm/termCreate.html")
+            return render_template("admin/adminTerm/termCreate.html", admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
         else:
             term_number = request.form['numPeriodo']
             term_year = request.form['yearPeriodo']
@@ -624,7 +693,7 @@ def admin_term_create():
                 mysql.connection.commit()
                 return redirect(url_for("admin.admin_term_menu"))
             else:
-                return render_template("admin/adminTerm/termCreate.html", msg = "Ya este período existe")
+                return render_template("admin/adminTerm/termCreate.html", msg = "Ya este período existe", admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
     else:
         # User is not admin
         return redirect(url_for("login.login")) 
@@ -659,7 +728,7 @@ def admin_term(name):
 '''         
             cursor.execute(get_classes, (name,))
             classes = cursor.fetchall()
-            return render_template("admin/adminTerm/term.html", classes=classes, term=term)
+            return render_template("admin/adminTerm/term.html", classes=classes, term=term, admin = {'user_name': session['nombre'] + ' ' + session['apellido']})
         else:
             # User is not admin
             return redirect(url_for("login.login"))
