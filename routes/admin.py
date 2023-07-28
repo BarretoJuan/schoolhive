@@ -185,14 +185,52 @@ def admin_major_create():
 
     
 
-@admin_bp.route("/major-") #implement major by id
-def admin_major():
+@admin_bp.route("/major/<name>") #implement major by id
+def admin_major(name):
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     user_check = check_user(session)
     if(user_check == "admin"):
         if request.method == 'GET':
-            major={"nombre":"Ingenieria informática"}
-            students=[{"nombre":"roberto roberto", "cedula":"555"},{"nombre":"pedro roberto", "cedula":"455"},{"nombre":"ramon roberto", "cedula":"44"},{"nombre":"enrique roberto", "cedula":"33"}]
-            classes=[{"nombre":"calculo IV", "periodo":"1-2023", "seccion":"n-613", "profesor":"roberto jose", "cedula_profesor":"5533", "num_participantes":"30"}, {"nombre":"calculo IV", "periodo":"1-2023", "seccion":"n-613", "profesor":"roberto jose", "cedula_profesor":"5533", "num_participantes":"30"}]
+            cursor.execute("SELECT nombre as nombre from carrera where nombre = %s", (name,))
+            major = cursor.fetchone()
+            print("major?" , major)
+
+            get_student_data = """
+            SELECT
+            estudiante.nombre as nombre,
+            estudiante.apellido as apellido,
+            estudiante.cedula as cedula,
+            estudiante.carrera as carrera
+            from estudiante
+            join carrera on carrera.nombre = estudiante.carrera
+            where carrera.nombre = %s
+            order by estudiante.apellido
+"""
+            cursor.execute(get_student_data, (name,))
+            students=cursor.fetchall()
+
+            get_classes_data = '''
+            SELECT
+            materia.nombre as nombre,
+            materia.seccion as seccion,
+            materia.periodo as periodo,
+            profesor.nombre as profesor,
+            profesor.apellido as profesor_apellido,
+            profesor.cedula as cedula_profesor,
+            COUNT(materia_estudiante.estudiante) as num_participantes
+            from materia
+            join materia_profesor on materia_profesor.materia = materia.id
+            join materia_estudiante on materia_estudiante.materia = materia.id
+            join profesor on profesor.cedula = materia_profesor.profesor
+            join seccion on seccion.nombre = materia.seccion
+            where seccion.carrera = %s
+            group by materia_estudiante.materia
+            order by materia.periodo
+            
+'''
+            cursor.execute(get_classes_data, (name,))
+            classes = cursor.fetchall()
             return render_template("admin/adminMajor/major.html", major=major,students=students,classes=classes)
         else:
             # User is not admin
@@ -406,14 +444,14 @@ def admin_section(section_name):
     JOIN materia_profesor ON materia.id = materia_profesor.materia
     JOIN profesor ON materia_profesor.profesor = profesor.cedula
     JOIN materia_estudiante ON materia.id = materia_estudiante.materia
-    where materia.seccion = 'C-613' 
+    where materia.seccion = %s 
     GROUP BY materia.id, materia.nombre, materia.periodo, profesor.nombre
     ORDER BY materia.periodo;
 
 
              
 ''' 
-            cursor.execute (get_classes)
+            cursor.execute (get_classes, (section_name,))
             classes = cursor.fetchall()
 
             get_section = "select nombre as nombre, carrera as carrera from seccion where nombre = %s"

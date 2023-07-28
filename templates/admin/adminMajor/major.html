@@ -63,7 +63,7 @@
 
         {%for student in students%}
         <tr>
-            <td>{{student['nombre']}}</td>    
+            <td>{{student['nombre']}} {{student['apellido']}}</td>    
             <td>{{student['cedula']}}</td>
         </tr>
         {%endfor%}
@@ -86,7 +86,7 @@
               <td>{{class['nombre']}}</td>    
               <td>{{class['seccion']}}</td>
               <td>{{class['periodo']}}</td>    
-              <td>{{class['profesor']}}</td>
+              <td>{{class['profesor']}} {{class['profesor_apellido']}}</td>
               <td>{{class['cedula_profesor']}}</td>    
               <td>{{class['num_participantes']}}</td>
           </tr>
