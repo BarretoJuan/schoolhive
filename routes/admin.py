@@ -283,19 +283,41 @@ def admin_professor_enroll(cedula):
     else:
         return redirect(url_for("login.login"))   
 
-@admin_bp.route("/professor-") #implement professor by id
-def admin_professor():
+@admin_bp.route("/professor/<cedula>") #implement professor by id
+def admin_professor(cedula):
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     user_check = check_user(session)
     if(user_check == "admin"):
         if request.method == 'GET':
+            get_classes = """
+            SELECT materia.id AS id_materia,
+            materia.nombre AS nombre_materia,
+            materia.seccion AS seccion,
+            materia.periodo AS periodo
+            FROM materia
+            INNER JOIN materia_profesor ON materia_profesor.materia = materia.id
+            WHERE materia.profesor_profesor = %s
+            ORDER BY materia.periodo
+            """
+            cursor.execute(get_classes, (cedula,))
+            classes = cursor.fetchall()
+
+            get_professor = """
+            
+            """
+
+
+
+        
+
             classes  = [{"nombre_materia":"calculo IV", "seccion":"n613", "periodo":"1-2023"}, {"nombre_materia":"calculo III", "seccion":"n613", "periodo":"1-2023"}]
             professor = {"nombre":"José José", "cedula":"5478487"}
             return render_template("admin/adminProfessor/professor.html", classes=classes, professor=professor)
-        else:
-            # User is not admin
-            return redirect(url_for("login.login"))
     else:
-        return redirect(url_for("login.login"))  
+        # User is not admin
+        return redirect(url_for("login.login"))
+    
 
 #ADMIN/SECTION ROUTES
 @admin_bp.route("/section-menu")
