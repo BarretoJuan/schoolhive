@@ -629,13 +629,36 @@ def admin_term_create():
         # User is not admin
         return redirect(url_for("login.login")) 
 
-@admin_bp.route("/term-") #implement term by id
-def admin_term():
+@admin_bp.route("/term/<name>") #implement term by id
+def admin_term(name):
+    mysql = current_app.config['MYSQL']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     user_check = check_user(session)
     if(user_check == "admin"):
         if request.method == 'GET':
-            classes  = [{"nombre_materia":"calculo IV", "seccion":"N-613", "profesor":"roberto jose", "num_participantes":"30"}, {"nombre_materia":"calculo IV", "seccion":"C-613", "profesor":"roberto jose", "num_participantes":"10"}]
-            term = {"nombre":"1-2023"}
+            cursor.execute ("SELECT periodo.nombre as nombre from periodo where periodo.nombre = %s", (name,))
+            term = cursor.fetchone()
+
+            get_classes = '''
+                SELECT 
+            materia.periodo as periodo,
+            materia.id AS materia_id,
+            materia.nombre AS nombre_materia,
+            materia.seccion AS seccion,
+            profesor.nombre AS profesor,
+            profesor.apellido as profesor_apellido,   
+            COUNT(materia_estudiante.estudiante) AS num_participantes
+            FROM materia
+            JOIN materia_profesor ON materia.id = materia_profesor.materia
+            JOIN profesor ON materia_profesor.profesor = profesor.cedula
+            JOIN materia_estudiante ON materia.id = materia_estudiante.materia
+            where materia.periodo = %s 
+            GROUP BY materia.id, materia.nombre, materia.periodo, profesor.nombre
+            ORDER BY materia.seccion;
+
+'''         
+            cursor.execute(get_classes, (name,))
+            classes = cursor.fetchall()
             return render_template("admin/adminTerm/term.html", classes=classes, term=term)
         else:
             # User is not admin
